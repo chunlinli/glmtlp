@@ -19,6 +19,6 @@ Tibshirani, R., Bien, J., Friedman, J., Hastie, T., Simon, N., Taylor, J., & Tib
 
 Yang, Y. & Zou, H. A coordinate majorization descent algorithm for l1 penalized learning. *Journal of Statistical Computation and Simulation* 84.1 (2014): 84-95. <https://doi.org/10.1080/00949655.2012.695374>.
 
-Zhu, Y., Shen, X., & Pan, W. (2020). On high-dimensional constrained maximum likelihood inference. *Journal of the American Statistical Association*, 115(529), 217-230. <https://doi-org/10.1080/01621459.2018.1540986>
+Zhu, Y., Shen, X., & Pan, W. (2020). On high-dimensional constrained maximum likelihood inference. *Journal of the American Statistical Association*, 115(529), 217-230. <https://doi.org/10.1080/01621459.2018.1540986>
 
-Zhu, Y. (2017). An augmented ADMM algorithm with application to the generalized lasso problem. *Journal of Computational and Graphical Statistics*, 26(1), 195-204. <https://doi-org/10.1080/10618600.2015.1114491>
+Zhu, Y. (2017). An augmented ADMM algorithm with application to the generalized lasso problem. *Journal of Computational and Graphical Statistics*, 26(1), 195-204. <https://doi.org/10.1080/10618600.2015.1114491>
