@@ -1,0 +1,144 @@
+---
+title: "A introduction to `glmtlp`"
+author: "Chunlin Li, Yu Yang, Chong Wu"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output:
+  pdf_document:
+    fig_caption: yes
+    toc: yes
+    toc_depth: 3
+vignette: >
+  %\VignetteIndexEntry{glmtlp}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r include=FALSE}
+# to control the output
+hook_output <- knitr::knit_hooks$get("output")
+knitr::knit_hooks$set(output = function(x, options) {
+  lines <- options$output.lines
+  if (is.null(lines)) {
+    return(hook_output(x, options))  # pass to default hook
+  }
+  x <- unlist(strsplit(x, "\n"))
+  more <- "..."
+  if (length(lines)==1) {        # first n lines
+    if (length(x) > lines) {
+      # truncate the output, but add ....
+      x <- c(head(x, lines), more)
+    }
+  } else {
+    x <- c(more, x[lines], more)
+  }
+  # paste these lines together
+  x <- paste(c(x, ""), collapse = "\n")
+  hook_output(x, options)
+})
+
+```
+
+
+## Introduction
+
+Glmtlp is a package that fits generalized linear models
+via penalized maximum likelihood. The regularization path is computed
+for the l0, l1, and TLP penalty at a grid of values (on the log
+scale) for the
+regularization parameter lambda or kappa (for l0 penalty). The algorithm is extremely fast. It fits linear and logistic regression models. The package includes
+methods for prediction and plotting, and functions for cross-validation.
+
+The authors of glmtlp are Chunlin Li, Yu Yang, and Chong Wu, and the R package is maintained by Chunlin Li and Yu Yang. A Python version is under development.
+
+This vignette describes basic usage of glmtlp in R. 
+
+## Installation
+
+Install the package from CRAN.
+
+```{r, eval=FALSE}
+install.packages("glmtlp")
+```
+
+## Quick Start
+
+In this section, we will go over the main functions and outputs in the package.
+
+First, we load the `glmtlp` package:
+```{r}
+library(glmtlp)
+```
+
+We load a simulated dataset with continuous response to illustrate the usage of 
+gaussian linear regression.
+```{r}
+data(gau_data)
+X <- gau_data$X
+y <- gau_data$y
+```
+
+We fit three models by calling `glmtlp` with `X`, `y`, `family="gaussian"` and 
+three different `penalty`.
+```{r}
+fit <- glmtlp(X, y, family = "gaussian", penalty = "tlp")
+fit2 <- glmtlp(X, y, family = "gaussian", penalty = "l0")
+fit3 <- glmtlp(X, y, family = "gaussian", penalty = "l1")
+```
+`fit` is an object of class `glmtlp` that contains all the relevant information of the fitted model for further use. Users can apply `plot`, `coef` and `predict` to 
+the fitted objects to get detailed results.
+
+We can visualize the coefficients by executing the `plot` method:
+```{r}
+plot(fit, xvar = "lambda")
+```
+
+The output is a `ggplot` object. Therefore, the users are allowed to make further 
+modifications on the plot to suit their own needs. The plot shows the solution path 
+of the model, with each curve corresponding to a variable. Users may also choose 
+to annotate the curves by setting `label=TRUE`. Note that for "l1" or "tlp" penalty, 
+`xvar` could be chosen from c("lambda", "log_lambda", "deviance", "l1_norm"), and for 
+"l0" penalty, `xvar` could be chosen from c("kappa", "log_kappa").
+
+We can use the `coef` function to obtain the fitted coefficients. By default, the 
+results would be a matrix, with each column representing the coefficients for every 
+$\lambda$ or $\kappa$. The users may also choose to input the desired value of 
+$\lambda$ or $\kappa$
+```{r output.lines = 1:10}
+coef(fit)
+coef(fit, lambda = 0.1)
+```
+
+In terms of prediction, the users need to input a design matrix and the type, as 
+well as the desired level of regularization parameters.
+```{r}
+predict(fit, X[1:5, ], lambda = 0.1)
+```
+
+Cross-validation can be implemented by `cv.glmtlp` to find the best regularization 
+parameter. 
+```{r}
+cv.fit <- cv.glmtlp(X, y, family = "gaussian", penalty = "tlp")
+```
+
+`cv.glmtlp` returns a `cv.glmtlp` object, a list with all the ingredients of the cross-validated fit. Users may use `coef`, `predict`, and `plot` to further check the cross-validation results.
+
+```{r output.lines = 10}
+coef(cv.fit)
+```
+
+```{r}
+plot(cv.fit)
+```
+
+This plot is a `ggplot` object and the users are allowed to make further modifications 
+on it.
+
+
+## References
+Shen, Xiaotong, Wei Pan, and Yunzhang Zhu. "Likelihood-based selection and sharp parameter estimation." *Journal of the American Statistical Association* 107.497 (2012): 223-232. <https://doi.org/10.1080/01621459.2011.645783>.
+
+Tibshirani, Robert, et al. "Strong rules for discarding predictors in lasso-type problems." *Journal of the Royal Statistical Society: Series B (Statistical Methodology)* 74.2 (2012): 245-266. <https://doi.org/10.1111/j.1467-9868.2011.01004.x>.
+
+Yang, Yi, and Hui Zou. "A coordinate majorization descent algorithm for l1 penalized learning." *Journal of Statistical Computation and Simulation* 84.1 (2014): 84-95. <https://doi.org/10.1080/00949655.2012.695374>.
+
+

@@ -1,0 +1,75 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# glmtlp
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+The goal of glmtlp is to fit generalized linear models with l0, l1 and truncated lasso penalty with a fast procedure.
+
+## Installation
+
+You can install the released version of glmtlp from [CRAN](https://CRAN.R-project.org) with:
+
+``` r
+install.packages("glmtlp")
+```
+
+## Examples
+
+The following are three examples which show you how to use `glmtlp`:
+
+```{r example1}
+library(glmtlp)
+data("gau_data")
+cv.fit <- cv.glmtlp(gau_data$X, gau_data$y, family = "gaussian", penalty = "tlp", ncores=2)
+coef(cv.fit)
+plot(cv.fit)
+fit <- glmtlp(gau_data$X, gau_data$y, family = "gaussian", penalty = "tlp")
+coef(fit, lambda = cv.fit$lambda.min)
+predict(fit, X = gau_data$X[1:5, ], lambda = cv.fit$lambda.min)
+plot(fit, xvar = "log_lambda", label = TRUE)
+```
+
+```{r example2}
+cv.fit <- cv.glmtlp(gau_data$X, gau_data$y, family = "gaussian", penalty = "l0", ncores=2)
+coef(cv.fit)
+plot(cv.fit)
+fit <- glmtlp(gau_data$X, gau_data$y, family = "gaussian", penalty = "l0")
+coef(fit, kappa = cv.fit$kappa.min)
+predict(fit, X = gau_data$X[1:5, ], kappa = cv.fit$kappa.min)
+plot(fit, xvar = "kappa", label = TRUE)
+```
+
+```{r example3}
+data("bin_data")
+cv.fit <- cv.glmtlp(bin_data$X, bin_data$y, family = "binomial", penalty = "l1", ncores=2)
+coef(cv.fit)
+plot(cv.fit)
+fit <- glmtlp(bin_data$X, bin_data$y, family = "binomial", penalty = "l1")
+coef(fit, lambda = cv.fit$lambda.min)
+predict(fit, X = bin_data$X[1:5, ], type = "response", lambda = cv.fit$lambda.min)
+plot(fit, xvar = "lambda", label = TRUE)
+```
+
+## References
+<!-- MLA style -->
+Shen, Xiaotong, Wei Pan, and Yunzhang Zhu. "Likelihood-based selection and sharp parameter estimation." *Journal of the American Statistical Association* 107.497 (2012): 223-232. <https://doi.org/10.1080/01621459.2011.645783>.
+
+Tibshirani, Robert, et al. "Strong rules for discarding predictors in lasso‐type problems." *Journal of the Royal Statistical Society: Series B (Statistical Methodology)* 74.2 (2012): 245-266. <https://doi.org/10.1111/j.1467-9868.2011.01004.x>.
+
+Yang, Yi, and Hui Zou. "A coordinate majorization descent algorithm for l1 penalized learning." *Journal of Statistical Computation and Simulation* 84.1 (2014): 84-95. <https://doi.org/10.1080/00949655.2012.695374>.
+
