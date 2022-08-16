@@ -1,0 +1,31 @@
+Package: glmtlp
+Type: Package
+Title: Generalized Linear Models with Truncated Lasso Penalty
+Version: 3.0.0
+Date: 2022-08-28
+Authors@R: c(
+    person("Chunlin", "Li", , "li000007@umn.edu", role = c("aut", "cph"),
+           comment = c(ORCID = "0000-0003-2989-8785")),
+    person("Yu", "Yang", , "yang6367@umn.edu", role = c("aut", "cre", "cph"),
+           comment = c(ORCID = "0000-0001-7355-6702")),
+    person("Chong", "Wu", role = c("aut", "cph"),
+           comment = c(ORCID = "0000-0002-8400-1785")),
+    person("Xiaotong", "Shen", role = c("ths", "cph")),
+    person("Wei", "Pan", role = c("ths", "cph"))
+  )
+URL: https://yuyangyy.com/glmtlp/
+Depends: R (>= 3.5.0)
+Imports: Rcpp, foreach, doParallel, ggplot2
+LinkingTo: Rcpp, RcppEigen
+Suggests: 
+    rmarkdown,
+    knitr,
+    testthat (>= 3.0.0)
+Description: Extremely efficient procedures for constrained likelihood estimation with truncated lasso penalty for linear, generalized linear, and Gaussian graphical models. This version is a completely new version compared with our previous version, which was mainly based on R. New core algorithms are developed and are now written in C++ and highly optimized. 
+SystemRequirements: C++14
+Encoding: UTF-8
+License: GPL-3
+LazyData: true
+RoxygenNote: 7.1.2
+VignetteBuilder: knitr
+Config/testthat/edition: 3

@@ -1,0 +1,73 @@
+---
+title: "A introduction to `glmtlp`"
+author: "Chunlin Li, Yu Yang, Chong Wu, Xiaotong Shen, Wei Pan"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output:
+  pdf_document:
+    fig_caption: yes
+    toc: yes
+    toc_depth: 3
+vignette: >
+  %\VignetteIndexEntry{glmtlp}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r include=FALSE}
+# to control the output
+hook_output <- knitr::knit_hooks$get("output")
+knitr::knit_hooks$set(output = function(x, options) {
+  lines <- options$output.lines
+  if (is.null(lines)) {
+    return(hook_output(x, options))  # pass to default hook
+  }
+  x <- unlist(strsplit(x, "\n"))
+  more <- "..."
+  if (length(lines)==1) {        # first n lines
+    if (length(x) > lines) {
+      # truncate the output, but add ....
+      x <- c(head(x, lines), more)
+    }
+  } else {
+    x <- c(more, x[lines], more)
+  }
+  # paste these lines together
+  x <- paste(c(x, ""), collapse = "\n")
+  hook_output(x, options)
+})
+
+```
+
+
+## Introduction
+
+`glmtlp` fits generalized linear models via penalized maximum likelihood. It 
+currently supports linear and logistic regression models. The regularization 
+path is computed for the l0, l1, and TLP penalty at a grid of values for the
+regularization parameter lambda $\lambda$ (for l1 and TLP penalty) or kappa
+$\kappa$ (for l0 penalty). In addition, the package provides methods for prediction and plotting, and functions for cross-validation.
+
+The authors of `glmtlp` are Chunlin Li, Yu Yang, and Chong Wu, and the R package 
+is maintained by Chunlin Li and Yu Yang. A Python version is under development.
+
+This vignette describes basic usage of `glmtlp` in R.
+
+## Installation
+
+Install the package from CRAN.
+
+
+
+
+## References
+Shen, X., Pan, W., & Zhu, Y. (2012). Likelihood-based selection and sharp parameter estimation. *Journal of the American Statistical Association*, 107(497), 223-232. <https://doi.org/10.1080/01621459.2011.645783>.
+
+Shen, X., Pan, W., Zhu, Y., & Zhou, H. (2013). On constrained and regularized high-dimensional regression. *Annals of the Institute of Statistical Mathematics*, 65(5), 807-832. <https://doi.org/10.1007/s10463-012-0396-3>
+
+Li, C., Shen, X., & Pan, W. (2021). Inference for a Large Directed Graphical Model with Interventions. *arXiv preprint* arXiv:2110.03805. <https://arxiv.org/abs/2110.03805>
+
+Tibshirani, R., Bien, J., Friedman, J., Hastie, T., Simon, N., Taylor, J., & Tibshirani, R. J. (2012). Strong rules for discarding predictors in lasso‐type problems. *Journal of the Royal Statistical Society: Series B (Statistical Methodology)*, 74(2), 245-266. <https://doi.org/10.1111/j.1467-9868.2011.01004.x>.
+
+Yang, Yi, and Hui Zou. "A coordinate majorization descent algorithm for l1 penalized learning." *Journal of Statistical Computation and Simulation* 84.1 (2014): 84-95. <https://doi.org/10.1080/00949655.2012.695374>.
+
+
