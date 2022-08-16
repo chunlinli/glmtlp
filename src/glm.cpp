@@ -27,6 +27,8 @@
 #include <queue>
 // [[Rcpp::depends(RcppEigen)]]
 
+typedef Eigen::Triplet<double> T;
+
 enum class Family
 {
     Gaussian,
@@ -349,11 +351,14 @@ Rcpp::List glm_solver(Rcpp::NumericMatrix &X_mat,
 
     // output
     int ntune = (method == Method::CTLP ? nkappa : nlambda);
-    Rcpp::NumericMatrix beta(p, ntune);
+    // Rcpp::NumericMatrix beta(p, ntune);
+    std::vector<T> sp_beta_list;
+    sp_beta_list.reserve(ntune * std::min(n, p));
+
     Rcpp::NumericVector intercept(ntune);
     Rcpp::NumericVector deviance(ntune);
 
-    Eigen::Map<Eigen::MatrixXd> b(&beta[0], p, ntune);
+    // Eigen::Map<Eigen::MatrixXd> b(&beta[0], p, ntune);
     Eigen::Map<Eigen::VectorXd> b0(&intercept[0], ntune);
     Eigen::Map<Eigen::VectorXd> dev(&deviance[0], ntune);
 
@@ -377,12 +382,14 @@ Rcpp::List glm_solver(Rcpp::NumericMatrix &X_mat,
 
     // TODO: user defined??
     std::fill(b0.data(), b0.data() + ntune, link(y_mean, family));
-    std::fill(b.data(), b.data() + p * ntune, 0.0);
+    // std::fill(b.data(), b.data() + p * ntune, 0.0);
 
     double intercept_new = b0[0];
     double intercept_old = b0[0]; // for warm start
-    Eigen::VectorXd beta_new = b.col(0);
-    Eigen::VectorXd beta_old = b.col(0); // for warm start
+    // Eigen::VectorXd beta_new = b.col(0);
+    // Eigen::VectorXd beta_old = b.col(0); // for warm start
+    Eigen::VectorXd beta_new = Eigen::VectorXd::Zero(p);
+    Eigen::VectorXd beta_old = Eigen::VectorXd::Zero(p); // for warm start
 
     rw.array() = (y.array() - y_mean) * w.array();
     double null_deviance = compute_deviance(y, Eigen::VectorXd::Constant(n, b0(0)), w, family);
@@ -844,7 +851,6 @@ Rcpp::List glm_solver(Rcpp::NumericMatrix &X_mat,
                                 //     printf("eta(%d) = %f, %d iter\n", i, eta(i), it_newton);
                                 //     printf("k = %d", k);
                                 // }
-                                    
                             }
                         }
 
@@ -874,7 +880,7 @@ Rcpp::List glm_solver(Rcpp::NumericMatrix &X_mat,
                                                      .ldlt()
                                                      .solve(X_.transpose() * z_);
 
-                    eta.array() = (X_ * beta_work_).array() / (w.array().sqrt()+0.000000001);
+                    eta.array() = (X_ * beta_work_).array() / (w.array().sqrt() + 0.000000001);
 
                     // update beta
                     for (int jj = 0; jj < support_size + df; ++jj)
@@ -883,7 +889,7 @@ Rcpp::List glm_solver(Rcpp::NumericMatrix &X_mat,
                     }
                     intercept_new = beta_work_(support_size + df);
 
-                    //eta.array() = (X * beta_work).array() + intercept_new;
+                    // eta.array() = (X * beta_work).array() + intercept_new;
 
                     if (family == Family::Gaussian)
                         break;
@@ -898,14 +904,20 @@ Rcpp::List glm_solver(Rcpp::NumericMatrix &X_mat,
                 }
 
                 double dev_ = compute_deviance(y, eta, w0, family);
-                //printf("dev = %f, kappa = %d\n", dev_, df);
-
+                // printf("dev = %f, kappa = %d\n", dev_, df);
 
                 if (dev_ < dev(kk))
                 {
                     dev(kk) = dev_;
                     b0(kk) = intercept_new;
-                    b.col(kk) = beta_work;
+                    // b.col(kk) = beta_work;
+                    for (int j = 0; j < p; ++j)
+                    {
+                        if (std::abs(beta_work(j)) > tol)
+                        {
+                            sp_beta_list.push_back(T(j, kk, beta_work(j)));
+                        }
+                    }
                 }
             }
 
@@ -915,8 +927,15 @@ Rcpp::List glm_solver(Rcpp::NumericMatrix &X_mat,
         {
             // write result for method == Lasso or RTLP
             dev(k) = compute_deviance(y, eta, w0, family);
-            b.col(k) = beta_new;
             b0(k) = intercept_new;
+            // b.col(k) = beta_new;
+            for (int j = 0; j < p; ++j)
+            {
+                if (std::abs(beta_new(j)) > tol)
+                {
+                    sp_beta_list.push_back(T(j, k, beta_new(j)));
+                }
+            }
         }
 
         if (EXIT_FLAG)
@@ -926,9 +945,13 @@ Rcpp::List glm_solver(Rcpp::NumericMatrix &X_mat,
 
     } /* end of tuning parameter sequence */
 
+    Eigen::SparseMatrix<double> beta(p, ntune);
+    beta.setFromTriplets(sp_beta_list.begin(), sp_beta_list.end());
+    beta.makeCompressed();
+
     return Rcpp::List::create(
         Rcpp::Named("intercept") = intercept,
-        Rcpp::Named("beta") = beta,
+        Rcpp::Named("beta") = Rcpp::wrap(beta),
         Rcpp::Named("deviance") = deviance,
         Rcpp::Named("kappa") = kappa_vec,
         Rcpp::Named("lambda") = lambda_vec);

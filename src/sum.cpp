@@ -27,6 +27,8 @@
 #include <queue>
 // [[Rcpp::depends(RcppEigen)]]
 
+typedef Eigen::Triplet<double> T;
+
 enum class Family
 {
     Gaussian,
@@ -105,6 +107,7 @@ inline double soft_thresh(double init, double thresh)
 // [[Rcpp::export]]
 Rcpp::List sum_solver(Rcpp::NumericMatrix &XX_mat,
                       Rcpp::NumericVector &Xy_vec,
+                      Rcpp::NumericVector &n_val,
                       Rcpp::NumericVector &pen_factors,
                       Rcpp::NumericVector &kappa_vec,
                       Rcpp::NumericVector &lambda_vec,
@@ -116,7 +119,8 @@ Rcpp::List sum_solver(Rcpp::NumericMatrix &XX_mat,
 {
     // input
     // const int n = X_mat.nrow();
-    // 
+    //
+    const int n = n_val[0];
     const int p = XX_mat.ncol();
     const int nlambda = lambda_vec.length();
     const int nkappa = kappa_vec.length();
@@ -147,10 +151,13 @@ Rcpp::List sum_solver(Rcpp::NumericMatrix &XX_mat,
 
     // output
     int ntune = (method == Method::CTLP ? nkappa : nlambda);
-    Rcpp::NumericMatrix beta(p, ntune);
+    //Rcpp::NumericMatrix beta(p, ntune);
+    std::vector<T> sp_beta_list;
+    sp_beta_list.reserve(ntune * std::min(n, p));
+
     Rcpp::NumericVector loss(ntune);
 
-    Eigen::Map<Eigen::MatrixXd> b(&beta[0], p, ntune); // this should be a column sparse matrix
+    //Eigen::Map<Eigen::MatrixXd> b(&beta[0], p, ntune); // this should be a column sparse matrix
     Eigen::Map<Eigen::VectorXd> l(&loss[0], ntune);
 
     // internal variables
@@ -172,10 +179,12 @@ Rcpp::List sum_solver(Rcpp::NumericMatrix &XX_mat,
     // std::fill(b0.data(), b0.data() + nlambda, link(y_mean, family));
 
     // need change
-    std::fill(b.data(), b.data() + p * ntune, 0.0);
+    //std::fill(b.data(), b.data() + p * ntune, 0.0);
 
-    Eigen::VectorXd beta_new = b.col(0);
-    Eigen::VectorXd beta_old = b.col(0); // for warm start
+    // Eigen::VectorXd beta_new = b.col(0);
+    // Eigen::VectorXd beta_old = b.col(0); // for warm start
+    Eigen::VectorXd beta_new = Eigen::VectorXd::Zero(p);
+    Eigen::VectorXd beta_old = Eigen::VectorXd::Zero(p); // for warm start
 
     // rw.array() = (y.array() - y_mean) * w.array();
     // double null_deviance
@@ -213,7 +222,7 @@ Rcpp::List sum_solver(Rcpp::NumericMatrix &XX_mat,
     std::vector<int> is_active(p, 0); // active set
     std::vector<int> is_strong(p, 0); // strong set
 
-    Eigen::VectorXd Xr_old(p); 
+    Eigen::VectorXd Xr_old(p);
     Xr_old = Xr;
 
     // TODO
@@ -534,7 +543,14 @@ Rcpp::List sum_solver(Rcpp::NumericMatrix &XX_mat,
                 if (loss_ < l(kk))
                 {
                     l(kk) = loss_;
-                    b.col(kk) = beta_work;
+                    // b.col(kk) = beta_work;
+                    for (int j = 0; j < p; ++j)
+                    {
+                        if (std::abs(beta_work(j)) > tol)
+                        {
+                            sp_beta_list.push_back(T(j, kk, beta_work(j)));
+                        }
+                    }
                 }
             }
         }
@@ -542,7 +558,14 @@ Rcpp::List sum_solver(Rcpp::NumericMatrix &XX_mat,
         {
             // TODO: update loss
             l(k) = beta_new.dot(XX * beta_new) * 0.5 - Xy.dot(beta_new);
-            b.col(k) = beta_new;
+            // b.col(k) = beta_new;
+            for (int j = 0; j < p; ++j)
+            {
+                if (std::abs(beta_new(j)) > tol)
+                {
+                    sp_beta_list.push_back(T(j, k, beta_new(j)));
+                }
+            }
         }
 
         if (EXIT_FLAG)
@@ -552,8 +575,12 @@ Rcpp::List sum_solver(Rcpp::NumericMatrix &XX_mat,
 
     } /* end of tuning parameter sequence */
 
+    Eigen::SparseMatrix<double> beta(p, ntune);
+    beta.setFromTriplets(sp_beta_list.begin(), sp_beta_list.end());
+    beta.makeCompressed();
+
     return Rcpp::List::create(
-        Rcpp::Named("beta") = beta,
+        Rcpp::Named("beta") = Rcpp::wrap(beta),
         Rcpp::Named("lambda") = lambda_vec,
         Rcpp::Named("kappa") = kappa,
         Rcpp::Named("loss") = loss);
