@@ -2,12 +2,12 @@
 
 library(glmnet)
 library(ncvreg)
-source('test/test_fns.R')
-
+#source('test/test_fns.R')
+library(glmtlp)
 
 # DATA GENERATION
 #set.seed(8053)
-n <- 5000
+n <- 500
 p <- 50000
 X <- matrix(rnorm(n*p),n,p)
 Z <- rnorm(n)

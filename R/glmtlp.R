@@ -164,8 +164,8 @@ glmtlp <- function(X, y, family = c("gaussian", "binomial", "poisson"),
                    tau = 0.5 * sqrt(log(nvars) / nobs),
                    delta = 2.0, tol = 1e-4,
                    weights = NULL, penalty_factor = rep(1.0, nvars),
-                   standardize = FALSE,
-                   cd_maxit = 10000, ...) {
+                   cd_maxit = 10000,
+                   standardize = FALSE, eager = TRUE, return_data = FALSE, ...) {
     this_call <- match.call()
     family <- match.arg(family)
     method <- match.arg(method)
@@ -262,10 +262,15 @@ glmtlp <- function(X, y, family = c("gaussian", "binomial", "poisson"),
         } else {
             if (lambda[nlambda] >= lambda_max) {
                 message("null model, try smaller lambdas")
-                return(get_null_output(
+                out <- get_null_output(
                     this_call,
                     y, family, method, penalty_factor, weights
-                ))
+                )
+                if (return_data) {
+                    out$X <- X
+                    out$y <- y
+                }
+                return(out)
             }
         }
     }
@@ -297,61 +302,78 @@ glmtlp <- function(X, y, family = c("gaussian", "binomial", "poisson"),
     cd_maxit <- as.integer(cd_maxit)
     standardize <- as.integer(standardize)
 
-    ## note that kappa might be NULL
-    fit <- glm_solver(
-        X, y, weights, penalty_factor, kappa, lambda, delta, tau,
-        tol, cd_maxit, standardize, df_max, family, method
-    )
-    ## glm_solver returns intercept, beta, deviance, lambda, kappa
 
-    varnames <- colnames(X)
-    if (is.null(varnames)) varnames <- paste("V", seq(nvars), sep = "")
-    rownames(fit$beta) <- varnames
-    if (method == "tlp-constrained") {
-        colnames(fit$beta) <- paste(kappa)
+    if (eager) {
+        fit <- call_glm_solver(
+            X, y, weights, penalty_factor, kappa, lambda, delta, tau,
+            tol, cd_maxit, standardize, family, method
+        )
+        ## glm_solver returns intercept, beta, deviance, lambda, kappa
+
+        varnames <- colnames(X)
+        if (is.null(varnames)) varnames <- paste("V", seq(nvars), sep = "")
+        rownames(fit$beta) <- varnames
+        if (method == "tlp-constrained") {
+            colnames(fit$beta) <- paste(kappa)
+        } else {
+            colnames(fit$beta) <- lambda_names(lambda)
+        }
+
+        out <- structure(
+            list(
+                beta = fit$beta,
+                intercept = fit$intercept,
+                family = family,
+                method = method,
+                penalty_factor = penalty_factor,
+                weights = weights,
+                deviance = fit$deviance,
+                call = this_call,
+                is_trained = TRUE
+            ),
+            class = "glmtlp"
+        )
+        if (method == "tlp-constrained") {
+            out$kappa <- kappa
+            out$lambda <- lambda
+            out$tau <- tau
+        } else if (method == "tlp-regularized") {
+            out$lambda <- lambda
+            out$tau <- tau
+        } else {
+            out$lambda <- lambda
+        }
     } else {
-        colnames(fit$beta) <- lambda_names(lambda)
+        is_trained <- FALSE
+        out <- get_null_output(
+            this_call,
+            y, family, method, penalty_factor, weights, is_trained
+        )
     }
 
-    out <- structure(
-        list(
-            beta = fit$beta,
-            intercept = fit$intercept,
-            family = family,
-            method = method,
-            penalty_factor = penalty_factor,
-            weights = weights,
-            deviance = fit$deviance,
-            call = this_call
-        ),
-        class = "glmtlp"
-    )
-    if (method == "tlp-constrained") {
-        out$kappa <- kappa
-        out$lambda <- lambda
-        out$tau <- tau
-    } else if (method == "tlp-regularized") {
-        out$lambda <- lambda
-        out$tau <- tau
-    } else {
-        out$lambda <- lambda
+    if (return_data) {
+        out$X <- X
+        out$y <- y
     }
+
     out
 }
 
 
 
 get_null_output <- function(this_call, y, family, method,
-                            penalty_factor, weights) {
+                            penalty_factor, weights, is_trained = TRUE) {
     structure(
         list(
-            beta = 0,
-            intercept = weighted.mean(y, weights), # this is wrong for binomial
+            beta = ifelse(is_trained, 0, NA),
+            intercept = ifelse(is_trained, weighted.mean(y, weights), NA),
+            # this is wrong for binomial
             family = family,
             method = method,
             penalty_factor = penalty_factor,
             weights = weights,
             call = this_call,
+            is_trained = is_trained
         ),
         class = "glmtlp"
     )

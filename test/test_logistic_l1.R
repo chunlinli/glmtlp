@@ -2,8 +2,8 @@
 
 library(glmnet)
 library(ncvreg)
-source('test/test_fns.R')
-#library(glmtlp)
+#source('test/test_fns.R')
+library(glmtlp)
 
 
 # DATA GENERATION
@@ -11,7 +11,7 @@ source('test/test_fns.R')
 
 
 n <- 1000
-p <- 5000
+p <- 10000
 X <- matrix(rnorm(n*p),n,p)
 Z <- rnorm(n)
 for(j in 1:p) {

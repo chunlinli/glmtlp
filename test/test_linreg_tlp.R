@@ -1,7 +1,7 @@
 library(tictoc)
 library(ncvreg)
-#library(glmtlp)
-source('test/test_fns.R')
+library(glmtlp)
+#source('test/test_fns.R')
 
 set.seed(1110)
 n <- 500

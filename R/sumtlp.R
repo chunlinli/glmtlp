@@ -115,7 +115,7 @@ sumtlp <- function(XX, Xy, nobs,
     cd_maxit <- as.integer(cd_maxit)
 
     fit <- sum_solver(
-        XX, Xy, penalty_factor, kappa, lambda, delta, tau, tol, cd_maxit, method
+        XX, Xy, nobs, penalty_factor, kappa, lambda, delta, tau, tol, cd_maxit, method
     )
 
     varnames <- colnames(XX)

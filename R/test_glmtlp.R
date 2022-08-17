@@ -17,7 +17,10 @@
 #     along with this program. If not, see <https://www.gnu.org/licenses/>.
 # **********/
 
-
+# H0 is index to test: null is "beta[H0] == 0"
+# this function needs improvement:
+# it is not efficient
+# it is misses corner cases
 test_glmtlp <- function(X, y, H0, penalty_factor = NULL,
                         model_selection = c("bic", "cv"), ...) {
     this_call <- match.call(expand.dots = TRUE)

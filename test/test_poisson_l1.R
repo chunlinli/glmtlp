@@ -2,8 +2,8 @@
 
 library(glmnet)
 library(ncvreg)
-source('test/test_fns.R')
-#library(glmtlp)
+#source('test/test_fns.R')
+library(glmtlp)
 
 
 # DATA GENERATION

@@ -1,1 +1,33 @@
-exportPattern("^[[:alpha:]]+")
+
+
+
+S3method(coef, cv_glmtlp)
+S3method(coef, glmtlp)
+S3method(plot, cv_glmtlp)
+S3method(plot, glmtlp)
+S3method(predict, cv_glmtlp)
+S3method(predict, glmtlp)
+export(coef.cv_glmtlp)
+export(coef.glmtlp)
+export(cv_glmtlp)
+export(gen_binomial_data)
+export(gen_gaussian_data)
+export(glmtlp)
+export(plot.cv_glmtlp)
+export(plot.glmtlp)
+export(predict.cv_glmtlp)
+export(predict.glmtlp)
+import(foreach)
+import(ggplot2)
+importFrom(stats,approx)
+importFrom(stats,model.matrix)
+importFrom(stats,plogis)
+importFrom(stats,rbinom)
+importFrom(stats,rnorm)
+importFrom(stats,sd)
+importFrom(stats,weighted.mean)
+importFrom(Rcpp, evalCpp)
+useDynLib(glmtlp, .registration=TRUE)
+
+
+
