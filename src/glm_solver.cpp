@@ -582,8 +582,6 @@ void glm_solver(
 
                 // eta = Eigen::VectorXd::Ones(n) * b0(0);
 
-                double dev_;
-                // double tmp = null_deviance;
 
                 for (int it_newton = 0; it_newton < 15; ++it_newton)
                 {
@@ -690,7 +688,7 @@ void glm_solver(
                     }
                 }
 
-                dev_ = compute_deviance(y, eta, w0, family);
+                double dev_ = compute_deviance(y, eta, w0, family);
                 // printf("dev = %f, kappa = %d\n", dev_, df);
 
                 if (dev_ + tol < dev(kk))

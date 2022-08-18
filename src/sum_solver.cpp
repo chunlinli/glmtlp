@@ -22,120 +22,48 @@
 #include "glmtlp.hpp"
 #include "utils.hpp"
 
-// Assume X has standardized columns.
-// Assume y is centered.
-// Observations are weighted by 1.
-
-// [[Rcpp::export]]
-Rcpp::List sum_solver(Rcpp::NumericMatrix &XX_mat,
-                      Rcpp::NumericVector &Xy_vec,
-                      Rcpp::NumericVector &n_val,
-                      Rcpp::NumericVector &pen_factors,
-                      Rcpp::NumericVector &kappa_vec,
-                      Rcpp::NumericVector &lambda_vec,
-                      Rcpp::NumericVector &delta_val,
-                      Rcpp::NumericVector &tau_val,
-                      Rcpp::NumericVector &tol_val,
-                      Rcpp::NumericVector &cd_maxit_val,
-                      Rcpp::CharacterVector &method_val)
+void sum_solver(
+    const double *XX_ptr,
+    const double *Xy_ptr,
+    const double *rho0_ptr,
+    const double *kappa_ptr,
+    const double *lambda_ptr,
+    const int n,
+    const int p,
+    const int nlambda,
+    const int nkappa,
+    const double delta,
+    const double tau,
+    const double tol,
+    const int cd_maxit,
+    const int method,
+    std::vector<Eigen::Triplet<double>> &sp_beta_list,
+    double *loss_ptr)
 {
-    // input
-    // const int n = X_mat.nrow();
-    //
-    const int n = n_val[0];
-    const int p = XX_mat.ncol();
-    const int nlambda = lambda_vec.length();
-    const int nkappa = kappa_vec.length();
-    const double delta = delta_val[0];
-    const double tau = tau_val[0];
-    const double tol = tol_val[0];
-    const int cd_maxit = cd_maxit_val[0];
-    // const int dc_maxit = dc_maxit_val[0];
-    // const int standardize = standardize_val[0];
 
-    // const int df_max = df_max_val[0];
-    // const int user = user_val[0];
-
-    const Family family = Family::Gaussian;
-    const Method method = strcmp(method_val[0], "l1-regularized") == 0
-                              ? Method::Lasso
-                          : strcmp(method_val[0], "tlp-regularized") == 0
-                              ? Method::RTLP
-                              : Method::CTLP;
-
-    // printf("family: %d\n", family);
-
-    const Eigen::Map<Eigen::MatrixXd> XX(&XX_mat[0], p, p);
-    const Eigen::Map<Eigen::VectorXd> Xy(&Xy_vec[0], p);
-    const Eigen::Map<Eigen::VectorXd> rho0(&pen_factors[0], p);
-    const Eigen::Map<Eigen::VectorXd> kappa(&kappa_vec[0], p);
-    const Eigen::Map<Eigen::VectorXd> lambda(&lambda_vec[0], nlambda);
+    const Eigen::Map<const Eigen::MatrixXd> XX(XX_ptr, p, p);
+    const Eigen::Map<const Eigen::VectorXd> Xy(Xy_ptr, p);
+    const Eigen::Map<const Eigen::VectorXd> rho0(rho0_ptr, p);
+    const Eigen::Map<const Eigen::VectorXd> lambda(lambda_ptr, nlambda);
+    const Eigen::Map<const Eigen::VectorXd> kappa(kappa_ptr, nkappa);
 
     // output
-    int ntune = (method == Method::CTLP ? nkappa : nlambda);
-    //Rcpp::NumericMatrix beta(p, ntune);
-    std::vector<T> sp_beta_list;
-    sp_beta_list.reserve(ntune * std::min(n, p));
-
-    Rcpp::NumericVector loss(ntune);
-
-    //Eigen::Map<Eigen::MatrixXd> b(&beta[0], p, ntune); // this should be a column sparse matrix
-    Eigen::Map<Eigen::VectorXd> l(&loss[0], ntune);
+    // int ntune = (method == Method::CTLP ? nkappa : nlambda);
+    int ntune = (method == 3 ? nkappa : nlambda);
+    Eigen::Map<Eigen::VectorXd> l(loss_ptr, ntune);
+    std::fill(l.data(), l.data() + ntune, 0.0);
 
     // internal variables
 
-    // Eigen::VectorXd b_old(p);
-    // Eigen::VectorXd r(n);
-    // Eigen::VectorXd x_sd(p);
-    // Eigen::VectorXd xx(p);
     Eigen::VectorXd Xr = Xy;
     Eigen::VectorXd rho(p);
-    // Eigen::VectorXd eta(n); // linear predictor
+    std::copy(rho0.data(), rho0.data() + p, rho.data());
 
-    // initialize
-    // double weight_sum = w.sum();
-    // w *= w_sum / weight_sum;
-    // double y_mean = y.dot(w) / w_sum;
-
-    // TODO: user defined??
-    // std::fill(b0.data(), b0.data() + nlambda, link(y_mean, family));
-
-    // need change
-    //std::fill(b.data(), b.data() + p * ntune, 0.0);
-
-    // Eigen::VectorXd beta_new = b.col(0);
-    // Eigen::VectorXd beta_old = b.col(0); // for warm start
     Eigen::VectorXd beta_new = Eigen::VectorXd::Zero(p);
     Eigen::VectorXd beta_old = Eigen::VectorXd::Zero(p); // for warm start
 
-    // rw.array() = (y.array() - y_mean) * w.array();
-    // double null_deviance
-    std::fill(l.data(), l.data() + ntune, 0.0);
-
-    // TODO: inference??
-    std::copy(rho0.data(), rho0.data() + p, rho.data());
-
-    // TODO: need more careful check for standardization
-    // xwx = X.array().square().matrix().transpose() * w / w_sum;
-    // if (standardize)
-    // {
-    //     // TODO
-    //     // should be weighted means and variances
-    //     x_sd = (xwx.array() - (X.transpose() * w / w_sum).array().square()).sqrt();
-    //     rho.array() *= x_sd.array();
-    // }
-    // else
-    // {
-    //     // TODO
-    //     std::fill(x_sd.data(), x_sd.data() + p, 1.0);
-    // }
-
-    // std::fill(eta.data(), eta.data() + n, b0(0));
-
     // add user initialize
     int it_total_cd = 0;
-    // int it_total_dc = 0;
-    // int it_total_nr = 0;
 
     int KKT = 0;
     int CONVERGED = 0;
@@ -167,10 +95,6 @@ Rcpp::List sum_solver(Rcpp::NumericMatrix &XX_mat,
             {
                 is_strong[j] = 1;
             }
-            // else
-            // {
-            //     is_strong[j] = 0;
-            // }
         }
 
         if (k == 1)
@@ -336,7 +260,8 @@ Rcpp::List sum_solver(Rcpp::NumericMatrix &XX_mat,
                 break;
             }
 
-            if (method == Method::Lasso || EXIT_FLAG)
+            //if (method == Method::Lasso || EXIT_FLAG)
+            if (method == 1 || EXIT_FLAG)
             {
                 break;
             }
@@ -370,8 +295,17 @@ Rcpp::List sum_solver(Rcpp::NumericMatrix &XX_mat,
 
         } /* end of difference-of-convex programming */
 
-        if (method == Method::CTLP)
+        //if (method == Method::CTLP)
+        if (method == 3)
         {
+            // TODO
+            std::vector<int> sp_beta_idx(nkappa, 0);
+            for (int kk = 1; kk < nkappa; ++kk)
+            {
+                sp_beta_idx[kk] = (int) std::round(sp_beta_idx[kk-1] + kappa(kk - 1));
+            }
+            sp_beta_list.resize((int) std::round(kappa.sum()));
+
             const int kappa_max = kappa(nkappa - 1);
 
             std::vector<int> active_idx;
@@ -449,28 +383,22 @@ Rcpp::List sum_solver(Rcpp::NumericMatrix &XX_mat,
                     }
                     //intercept_new = beta_work_(support_size + df);
 
-                    if (family == Family::Gaussian)
-                        break;
-
-                    /* check newton-raphson convergence */
-                    // if ((b.col(k) - b_old).array().abs().maxCoeff() <= tol)
-                    // if ((beta_work - b_old).array().abs().maxCoeff() <= tol)
-                    // {
-                    //     // printf("Newton-Raphson converged.\n");
-                    //     break;
-                    // }
+                    //if (family == Family::Gaussian)
+                    break;
                 }
 
                 double loss_ = beta_work.dot(XX * beta_work) * 0.5 - Xy.dot(beta_work);
-                if (loss_ < l(kk))
+                if (loss_ + tol < l(kk))
                 {
                     l(kk) = loss_;
                     // b.col(kk) = beta_work;
+                    int i = 0;
                     for (int j = 0; j < p; ++j)
                     {
                         if (std::abs(beta_work(j)) > tol)
                         {
-                            sp_beta_list.push_back(T(j, kk, beta_work(j)));
+                            sp_beta_list[sp_beta_idx[kk] + i] = Eigen::Triplet<double>(j, kk, beta_work(j));
+                            ++i;
                         }
                     }
                 }
@@ -485,7 +413,7 @@ Rcpp::List sum_solver(Rcpp::NumericMatrix &XX_mat,
             {
                 if (std::abs(beta_new(j)) > tol)
                 {
-                    sp_beta_list.push_back(T(j, k, beta_new(j)));
+                    sp_beta_list.push_back(Eigen::Triplet<double>(j, k, beta_new(j)));
                 }
             }
         }
@@ -497,13 +425,4 @@ Rcpp::List sum_solver(Rcpp::NumericMatrix &XX_mat,
 
     } /* end of tuning parameter sequence */
 
-    Eigen::SparseMatrix<double> beta(p, ntune);
-    beta.setFromTriplets(sp_beta_list.begin(), sp_beta_list.end());
-    beta.makeCompressed();
-
-    return Rcpp::List::create(
-        Rcpp::Named("beta") = Rcpp::wrap(beta),
-        Rcpp::Named("lambda") = lambda_vec,
-        Rcpp::Named("kappa") = kappa,
-        Rcpp::Named("loss") = loss);
 }
