@@ -74,13 +74,13 @@ predict.cv_glmtlp <- function(object, X, type=c("link","response","class","coeff
                  which=which, ...)
 }
 
-#' Extract coefficients from a cv.glmtlp object
+#' Extract coefficients from a cv_glmtlp object
 #'
-#' @method coef cv.glmtlp
-#' @rdname predict.cv.glmtlp
+#' @method coef cv_glmtlp
+#' @rdname predict.cv_glmtlp
 #' @export
-#' @export coef.cv.glmtlp
+#' @export coef.cv_glmtlp
 #'
 coef.cv_glmtlp <- function(object, lambda=NULL, kappa=NULL, which=object$idx_min, ...) {
-  coef_glmtlp(object$fit, lambda=lambda, kappa=kappa, which=which, ...)
+  coef.glmtlp(object$fit, lambda=lambda, kappa=kappa, which=which, ...)
 }

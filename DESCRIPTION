@@ -24,7 +24,7 @@ Suggests:
 Description: Extremely efficient procedures for constrained likelihood estimation with truncated lasso penalty for linear, generalized linear, and Gaussian graphical models. This version is a completely new version compared with our previous version, which was mainly based on R. New core algorithms are developed and are now written in C++ and highly optimized. 
 SystemRequirements: C++14
 Encoding: UTF-8
-License: GPL-3
+License: GPL-3 + file LICENSE
 LazyData: true
 RoxygenNote: 7.1.2
 VignetteBuilder: knitr

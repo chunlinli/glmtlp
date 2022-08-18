@@ -4,3 +4,6 @@
 
 ^test
 ^vignettes
+^\.vscode
+^CHANGELOG
+^revdep

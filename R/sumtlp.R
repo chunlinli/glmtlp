@@ -40,12 +40,12 @@ sumtlp <- function(XX, Xy, nobs,
     # check data XX, Xy
     xxdim <- dim(XX)
     if (is.null(xxdim) || any(xxdim != nvars)) {
-        stop("X should be a squared matrix")
+        stop("XX should be a squared matrix")
     }
 
     if (is.big.matrix(XX)) {
-        if (typeof(X) != "double") {
-            stop("X should be a big matrix of double")
+        if (typeof(XX) != "double") {
+            stop("XX should be a big matrix of double")
         }
     } else {
         if (any(is.na(Xy)) || any(is.na(XX))) {
