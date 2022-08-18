@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef SOLVER_HPP
-#define SOLVER_HPP
-
 #include "Eigen/Sparse"
 
 void glm_solver(
@@ -45,5 +42,3 @@ void sum_solver(
     const int method,
     std::vector<Eigen::Triplet<double>> &sp_beta_list,
     double *loss_ptr);
-
-#endif // SOLVER_HPP

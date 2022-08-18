@@ -19,8 +19,8 @@
 
 // #include <stdio.h>
 
-#include "glmtlp.hpp"
-#include "utils.hpp"
+#include "glmtlp.h"
+#include "utils.h"
 
 void sum_solver(
     const double *XX_ptr,

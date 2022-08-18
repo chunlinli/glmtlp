@@ -31,7 +31,7 @@
 #include <cmath>
 #include <queue>
 
-#include "glmtlp.hpp"
+#include "glmtlp.h"
 
 inline double soft_thresh(double init, double thresh)
 {

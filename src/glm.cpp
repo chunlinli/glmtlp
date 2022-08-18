@@ -19,9 +19,9 @@
 
 // #include <stdio.h>
 
-#include "glmtlp.hpp"
-#include "utils.hpp"
-#include "solver.hpp"
+#include "glmtlp.h"
+#include "utils.h"
+#include "solver.h"
 
 // enum class Family
 // {

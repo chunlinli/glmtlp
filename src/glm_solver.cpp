@@ -19,8 +19,8 @@
 
 //#include "glmtlp.hpp"
 
-#include "utils.hpp"
-#include "solver.hpp"
+#include "utils.h"
+#include "solver.h"
 
 #include "glmtlp_omp.h"
 
