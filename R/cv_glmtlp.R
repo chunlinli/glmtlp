@@ -112,7 +112,7 @@ cv_glmtlp <- function(X, y, ...,
                       seed = NULL, ncores = 1) {
     cv_call <- match.call(expand.dots = TRUE)
 
-    fit <- glmtlp(X = X, y = y, ...)
+    fit <- glmtlp(X = X, y = y, ncores = ncores, ...) # ncores = ncores may not be good
     nobs <- nrow(X)
     family <- fit$family
     method <- fit$method
@@ -161,7 +161,8 @@ cv_glmtlp <- function(X, y, ...,
             fit_fold <- glmtlp(X, y,
                 weights = 1 * (obs_fold != fold),
                 lambda = lambda, kappa = kappa,
-                family = family, method = method
+                family = family, method = method,
+                ncores = 1
             )
             yhat <- predict.glmtlp(fit_fold,
                 X = X[obs_fold == fold, , drop = FALSE],
@@ -176,7 +177,8 @@ cv_glmtlp <- function(X, y, ...,
             fit_fold <- glmtlp(X, y,
                 weights = 1 * (obs_fold != fold),
                 lambda = lambda, kappa = kappa,
-                family = family, method = method
+                family = family, method = method,
+                ncores = 1
             )
             yhat <- predict.glmtlp(fit_fold,
                 X = X[obs_fold == fold, , drop = FALSE],
