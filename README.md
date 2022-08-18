@@ -32,3 +32,7 @@ Yang, Y. & Zou, H. A coordinate majorization descent algorithm for l1 penalized 
 Zhu, Y., Shen, X., & Pan, W. (2020). On high-dimensional constrained maximum likelihood inference. *Journal of the American Statistical Association*, 115(529), 217-230. <https://doi.org/10.1080/01621459.2018.1540986>
 
 Zhu, Y. (2017). An augmented ADMM algorithm with application to the generalized lasso problem. *Journal of Computational and Graphical Statistics*, 26(1), 195-204. <https://doi.org/10.1080/10618600.2015.1114491>
+
+Part of the code is adapted from [`glmnet`](https://github.com/cran/glmnet), [`ncvreg`](https://github.com/pbreheny/ncvreg/), and [`biglasso`](https://github.com/YaohuiZeng/biglasso).
+
+**Warm thanks to the authors of above open-sourced softwares.**
