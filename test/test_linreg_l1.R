@@ -6,9 +6,9 @@ library(ncvreg)
 library(glmtlp)
 
 # DATA GENERATION
-#set.seed(8053)
+set.seed(1110)
 n <- 500
-p <- 50000
+p <- 100000
 X <- matrix(rnorm(n*p),n,p)
 Z <- rnorm(n)
 for(j in 1:p) {
@@ -21,7 +21,7 @@ y <- 1 + 0.2*(X[,1] - X[,2] + X[,10] - X[,50] + X[,200]) + rnorm(n)
 # SPEED TEST: single solution path (100 lambdas)
 # Compare with glmnet and ncvreg
 t0 <- Sys.time()
-m3 <- glmtlp(X=X, y=y, method="l1", family = "gaussian")
+m3 <- glmtlp(X=X, y=y, method="l1", family = "gaussian", ncores = 4)
 t1 <- Sys.time()
 print("ours")
 print(t1-t0)

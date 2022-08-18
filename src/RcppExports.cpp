@@ -12,8 +12,8 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // call_glm_solver
-Rcpp::List call_glm_solver(Rcpp::NumericMatrix& X_mat, Rcpp::NumericVector& y_vec, Rcpp::NumericVector& obs_weights, Rcpp::NumericVector& pen_factors, Rcpp::NumericVector& kappa_vec, Rcpp::NumericVector& lambda_vec, Rcpp::NumericVector& delta_val, Rcpp::NumericVector& tau_val, Rcpp::NumericVector& tol_val, Rcpp::NumericVector& cd_maxit_val, Rcpp::NumericVector& standardize_val, Rcpp::CharacterVector& family_val, Rcpp::CharacterVector& method_val);
-RcppExport SEXP _glmtlp_call_glm_solver(SEXP X_matSEXP, SEXP y_vecSEXP, SEXP obs_weightsSEXP, SEXP pen_factorsSEXP, SEXP kappa_vecSEXP, SEXP lambda_vecSEXP, SEXP delta_valSEXP, SEXP tau_valSEXP, SEXP tol_valSEXP, SEXP cd_maxit_valSEXP, SEXP standardize_valSEXP, SEXP family_valSEXP, SEXP method_valSEXP) {
+Rcpp::List call_glm_solver(Rcpp::NumericMatrix& X_mat, Rcpp::NumericVector& y_vec, Rcpp::NumericVector& obs_weights, Rcpp::NumericVector& pen_factors, Rcpp::NumericVector& kappa_vec, Rcpp::NumericVector& lambda_vec, Rcpp::NumericVector& delta_val, Rcpp::NumericVector& tau_val, Rcpp::NumericVector& tol_val, Rcpp::NumericVector& cd_maxit_val, Rcpp::NumericVector& standardize_val, Rcpp::NumericVector& ncores_val, Rcpp::CharacterVector& family_val, Rcpp::CharacterVector& method_val);
+RcppExport SEXP _glmtlp_call_glm_solver(SEXP X_matSEXP, SEXP y_vecSEXP, SEXP obs_weightsSEXP, SEXP pen_factorsSEXP, SEXP kappa_vecSEXP, SEXP lambda_vecSEXP, SEXP delta_valSEXP, SEXP tau_valSEXP, SEXP tol_valSEXP, SEXP cd_maxit_valSEXP, SEXP standardize_valSEXP, SEXP ncores_valSEXP, SEXP family_valSEXP, SEXP method_valSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -28,15 +28,41 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< Rcpp::NumericVector& >::type tol_val(tol_valSEXP);
     Rcpp::traits::input_parameter< Rcpp::NumericVector& >::type cd_maxit_val(cd_maxit_valSEXP);
     Rcpp::traits::input_parameter< Rcpp::NumericVector& >::type standardize_val(standardize_valSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector& >::type ncores_val(ncores_valSEXP);
     Rcpp::traits::input_parameter< Rcpp::CharacterVector& >::type family_val(family_valSEXP);
     Rcpp::traits::input_parameter< Rcpp::CharacterVector& >::type method_val(method_valSEXP);
-    rcpp_result_gen = Rcpp::wrap(call_glm_solver(X_mat, y_vec, obs_weights, pen_factors, kappa_vec, lambda_vec, delta_val, tau_val, tol_val, cd_maxit_val, standardize_val, family_val, method_val));
+    rcpp_result_gen = Rcpp::wrap(call_glm_solver(X_mat, y_vec, obs_weights, pen_factors, kappa_vec, lambda_vec, delta_val, tau_val, tol_val, cd_maxit_val, standardize_val, ncores_val, family_val, method_val));
+    return rcpp_result_gen;
+END_RCPP
+}
+// call_bm_glm_solver
+Rcpp::List call_bm_glm_solver(SEXP& X_mat, Rcpp::NumericVector& y_vec, Rcpp::NumericVector& obs_weights, Rcpp::NumericVector& pen_factors, Rcpp::NumericVector& kappa_vec, Rcpp::NumericVector& lambda_vec, Rcpp::NumericVector& delta_val, Rcpp::NumericVector& tau_val, Rcpp::NumericVector& tol_val, Rcpp::NumericVector& cd_maxit_val, Rcpp::NumericVector& standardize_val, Rcpp::NumericVector& ncores_val, Rcpp::CharacterVector& family_val, Rcpp::CharacterVector& method_val);
+RcppExport SEXP _glmtlp_call_bm_glm_solver(SEXP X_matSEXP, SEXP y_vecSEXP, SEXP obs_weightsSEXP, SEXP pen_factorsSEXP, SEXP kappa_vecSEXP, SEXP lambda_vecSEXP, SEXP delta_valSEXP, SEXP tau_valSEXP, SEXP tol_valSEXP, SEXP cd_maxit_valSEXP, SEXP standardize_valSEXP, SEXP ncores_valSEXP, SEXP family_valSEXP, SEXP method_valSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP& >::type X_mat(X_matSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector& >::type y_vec(y_vecSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector& >::type obs_weights(obs_weightsSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector& >::type pen_factors(pen_factorsSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector& >::type kappa_vec(kappa_vecSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector& >::type lambda_vec(lambda_vecSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector& >::type delta_val(delta_valSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector& >::type tau_val(tau_valSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector& >::type tol_val(tol_valSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector& >::type cd_maxit_val(cd_maxit_valSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector& >::type standardize_val(standardize_valSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector& >::type ncores_val(ncores_valSEXP);
+    Rcpp::traits::input_parameter< Rcpp::CharacterVector& >::type family_val(family_valSEXP);
+    Rcpp::traits::input_parameter< Rcpp::CharacterVector& >::type method_val(method_valSEXP);
+    rcpp_result_gen = Rcpp::wrap(call_bm_glm_solver(X_mat, y_vec, obs_weights, pen_factors, kappa_vec, lambda_vec, delta_val, tau_val, tol_val, cd_maxit_val, standardize_val, ncores_val, family_val, method_val));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_glmtlp_call_glm_solver", (DL_FUNC) &_glmtlp_call_glm_solver, 13},
+    {"_glmtlp_call_glm_solver", (DL_FUNC) &_glmtlp_call_glm_solver, 14},
+    {"_glmtlp_call_bm_glm_solver", (DL_FUNC) &_glmtlp_call_bm_glm_solver, 14},
     {NULL, NULL, 0}
 };
 

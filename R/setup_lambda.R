@@ -43,9 +43,10 @@ setup_lambda <- function(X, y, weights, lambda_min_ratio, nlambda) {
     lambda
 }
 
+# this must be written in C++ for big matrix
 get_lambda_max <- function(X, y, weights) {
     rw <- (y - weighted.mean(y, weights)) * weights
-    max(abs(crossprod(X, rw)), na.rm = TRUE) / nrow(X)
+    max(abs(crossprod(X, rw))) / nrow(X)
 }
 
 setup_lambda_sum <- function(Xy, lambda_min_ratio, nlambda) {

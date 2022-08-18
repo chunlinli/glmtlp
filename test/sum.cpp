@@ -17,88 +17,10 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>.
 **********/
 
-#include <stdio.h>
+// #include <stdio.h>
 
-#include <Rcpp.h>
-#include <RcppEigen.h>
-#include <vector>
-#include <string.h>
-#include <cmath>
-#include <queue>
-// [[Rcpp::depends(RcppEigen)]]
-
-typedef Eigen::Triplet<double> T;
-
-enum class Family
-{
-    Gaussian,
-    Binomial,
-    Poisson
-};
-
-enum class Method
-{
-    Lasso,
-    RTLP,
-    CTLP
-};
-
-// optimizer
-
-// template
-
-inline double soft_thresh(double init, double thresh)
-{
-    if (init > thresh)
-        init -= thresh;
-    else if (init < -thresh)
-        init += thresh;
-    else
-        init = 0.0;
-    return init;
-}
-
-// inline double link(double mu, Family family)
-// {
-//     switch (family)
-//     {
-//     case Family::Gaussian:
-//         return mu;
-//     case Family::Binomial:
-//         return NAN;
-//     case Family::Poisson:
-//         return NAN;
-//     default:
-//         return NAN;
-//     }
-// }
-
-// inline double compute_deviance(const Eigen::VectorXd &y,
-//                                const Eigen::VectorXd &eta,
-//                                const Eigen::VectorXd &w,
-//                                Family family)
-// {
-//     switch (family)
-//     {
-//     case Family::Gaussian:
-//     {
-//         return (y - eta).array().square().matrix().dot(w);
-//     }
-//     case Family::Binomial:
-//     {
-//         return NAN;
-//     }
-//     case Family::Poisson:
-//     {
-//         return NAN;
-//     }
-
-//     default:
-//     {
-//         return NAN;
-//     }
-//     }
-// }
+#include "glmtlp.hpp"
+#include "utils.hpp"
 
 // Assume X has standardized columns.
 // Assume y is centered.

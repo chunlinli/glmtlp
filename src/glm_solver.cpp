@@ -20,6 +20,7 @@
 #include "glmtlp.hpp"
 #include "utils.hpp"
 #include "solver.hpp"
+#include "glmtlp_omp.h"
 
 inline double soft_thresh(double init, double thresh)
 {
@@ -104,10 +105,21 @@ void glm_solver(
     const int standardize,
     int family,
     int method,
+    int ncores,
     std::vector<Eigen::Triplet<double>> &sp_beta_list,
     double *b0_ptr,
     double *dev_ptr)
 {
+    // setup OpenMP
+#ifdef GLMTLP_OMP_H_
+    if(ncores < 1) 
+    {
+        ncores = omp_get_num_procs();
+    }
+    omp_set_dynamic(0);
+    omp_set_num_threads(ncores);
+#endif
+
     const Eigen::Map<Eigen::MatrixXd> X(X_ptr, n, p);
     const Eigen::Map<Eigen::VectorXd> y(y_ptr, n);
     const Eigen::Map<Eigen::VectorXd> w0(w0_ptr, n);
@@ -208,6 +220,7 @@ void glm_solver(
 
         /* beginning of varaible screening module */
         double cutoff = 2.0 * lambda(k) - lambda(k - 1);
+#pragma omp parallel for schedule(static)
         for (int j = 0; j < p; ++j)
         {
             if (std::abs(X.col(j).dot(rw) / n) >= cutoff * rho(j))
@@ -269,6 +282,7 @@ void glm_solver(
                             }
 
                             w_sum = w.sum();
+#pragma omp parallel for schedule(static)
                             for (int j = 0; j < p; ++j)
                             {
                                 if (is_active[j])
@@ -295,6 +309,7 @@ void glm_solver(
                             }
 
                             w_sum = w.sum();
+#pragma omp parallel for schedule(static)
                             for (int j = 0; j < p; ++j)
                             {
                                 if (is_active[j])
@@ -391,6 +406,7 @@ void glm_solver(
 
                     /* beginning of KKT checking for strong set */
                     KKT = 1;
+#pragma omp parallel for schedule(static)
                     for (int j = 0; j < p; ++j)
                     {
                         if (is_strong[j] && !is_active[j] &&
@@ -410,6 +426,7 @@ void glm_solver(
 
                 /* beginning of KKT checking for the rest */
                 KKT = 1;
+#pragma omp parallel for schedule(static)
                 for (int j = 0; j < p; ++j)
                 {
                     if (!is_strong[j] && !is_active[j] &&

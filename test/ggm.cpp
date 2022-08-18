@@ -19,27 +19,10 @@
 
 #include <stdio.h>
 
-#include <Rcpp.h>
-#include <RcppEigen.h>
-#include <vector>
-#include <string.h>
-#include <cmath>
-#include <queue>
-// [[Rcpp::depends(RcppEigen)]]
+#include "glmtlp.hpp"
+#include "utils.hpp"
 
-enum class Method
-{
-    Lasso,
-    RTLP,
-    CTLP
-};
 
-// enum class Solver
-// {
-//     DPGLASSO,
-//     ADMM,
-//     MB
-// };
 
 void soft_thresh(Eigen::MatrixXd &A, Eigen::MatrixXd &Thr)
 {

@@ -153,6 +153,7 @@
 #' y <- sample(c(0, 1), 100, replace = TRUE)
 #' fit <- glmtlp(X, y, family = "binomial", penalty = "l1")
 #' @importFrom stats model.matrix
+#' @importFrom bigmemory is.big.matrix
 #' @export glmtlp
 
 glmtlp <- function(X, y, family = c("gaussian", "binomial", "poisson"),
@@ -164,7 +165,7 @@ glmtlp <- function(X, y, family = c("gaussian", "binomial", "poisson"),
                    tau = 0.5 * sqrt(log(nvars) / nobs),
                    delta = 2.0, tol = 1e-4,
                    weights = NULL, penalty_factor = rep(1.0, nvars),
-                   cd_maxit = 10000,
+                   cd_maxit = 10000, ncores = 1,
                    standardize = FALSE, eager = TRUE, return_data = FALSE, ...) {
     this_call <- match.call()
     family <- match.arg(family)
@@ -175,14 +176,20 @@ glmtlp <- function(X, y, family = c("gaussian", "binomial", "poisson"),
     if (is.null(xdim) || xdim[2] < 1) {
         stop("X should be a matrix")
     }
-    if (!inherits(X, "matrix")) {
-        tmp <- try(X <- model.matrix(~ 0 + ., data = X), silent = TRUE)
-        if (inherits(tmp, "try-error")) {
-            stop("X must be a matrix or able to be coerced to a matrix")
+    if (is.big.matrix(X)) {
+        if (typeof(X) != "double") {
+            stop("X should be a big matrix of double")
         }
+    } else {
+        if (!inherits(X, "matrix")) {
+            tmp <- try(X <- model.matrix(~ 0 + ., data = X), silent = TRUE)
+            if (inherits(tmp, "try-error")) {
+                stop("X must be a matrix or able to be coerced to a matrix")
+            }
+        }
+        if (typeof(X) == "character") stop("X must be a numeric matrix")
+        if (typeof(X) == "integer") storage.mode(X) <- "double"
     }
-    if (typeof(X) == "character") stop("X must be a numeric matrix")
-    if (typeof(X) == "integer") storage.mode(X) <- "double"
 
     nobs <- as.integer(xdim[1])
     nvars <- as.integer(xdim[2])
@@ -205,11 +212,15 @@ glmtlp <- function(X, y, family = c("gaussian", "binomial", "poisson"),
         )
         options(op)
     }
-    if (any(is.na(y)) || any(is.na(X))) {
-        stop("Missing data (NA's) detected. Take actions
+
+    if (!is.big.matrix(X)) {
+        if (any(is.na(y)) || any(is.na(X))) {
+            stop("Missing data (NA's) detected. Take actions
                 (e.g., removing cases, removing features, imputation)
                 to eliminate missing data before passing X and y to the model")
+        }
     }
+
     if (family == "binomial" && length(table(y)) > 2) {
         stop("Attemping to use family='binomial' with non-binary data",
             call. = FALSE
@@ -291,7 +302,7 @@ glmtlp <- function(X, y, family = c("gaussian", "binomial", "poisson"),
             }
         }
     } else {
-        kappa <- -1
+        kappa <- NA
     }
 
     ## check tau, delta, tol, and maxiters:
@@ -301,13 +312,22 @@ glmtlp <- function(X, y, family = c("gaussian", "binomial", "poisson"),
     tol <- as.double(tol)
     cd_maxit <- as.integer(cd_maxit)
     standardize <- as.integer(standardize)
+    ncores <- as.integer(ncores)
 
 
     if (eager) {
-        fit <- call_glm_solver(
-            X, y, weights, penalty_factor, kappa, lambda, delta, tau,
-            tol, cd_maxit, standardize, family, method
-        )
+        if (is.big.matrix(X)) {
+            fit <- call_bm_glm_solver(
+                X@address, y, weights, penalty_factor, kappa, lambda, delta, tau,
+                tol, cd_maxit, standardize, ncores, family, method
+            )
+        } else {
+            fit <- call_glm_solver(
+                X, y, weights, penalty_factor, kappa, lambda, delta, tau,
+                tol, cd_maxit, standardize, ncores, family, method
+            )
+        }
+
         ## glm_solver returns intercept, beta, deviance, lambda, kappa
 
         varnames <- colnames(X)

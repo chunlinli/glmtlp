@@ -15,7 +15,7 @@ Authors@R: c(
   )
 URL: https://yuyangyy.com/glmtlp/
 Depends: R (>= 3.5.0)
-Imports: Rcpp, foreach, doParallel, ggplot2
+Imports: Rcpp, foreach, doParallel, ggplot2, bigmemory, Matrix
 LinkingTo: Rcpp, RcppEigen, bigmemory, BH
 Suggests: 
     rmarkdown,

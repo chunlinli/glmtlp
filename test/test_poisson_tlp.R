@@ -7,7 +7,7 @@ library(glmtlp)
 
 
 # DATA GENERATION
-#set.seed(1117)
+set.seed(1110)
 
 n <- 2000
 p <- 20000
@@ -50,18 +50,15 @@ print(b2)
 
 
 
-# tic("MCP")
-# m3 <- ncvreg(X=X, y=y, family="poisson", penalty="MCP",returnX=FALSE)
-# toc()
-#
-# k <- 32
-# beta <- m3$beta[-1,k]
-# idx <- which(beta != 0)
-# b3 <- beta[idx]
-#
-# print("MCP selects:")
-# print(b3)
-#
-#
-# print(b2/b3)
+tic("MCP")
+m3 <- ncvreg(X=X, y=y, family="poisson", penalty="MCP",returnX=FALSE)
+toc()
+
+k <- 50
+beta <- m3$beta[-1,k]
+idx <- which(beta != 0)
+b3 <- beta[idx]
+
+print("MCP selects:")
+print(b3)
 

@@ -25,6 +25,7 @@ void glm_solver(
                 const int standardize,
                 int family,
                 int method,
+                int ncores,
                 std::vector<Eigen::Triplet<double>> &sp_beta_list,
                 double* b0_ptr,
                 double* dev_ptr
