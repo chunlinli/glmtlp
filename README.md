@@ -1,6 +1,8 @@
-# glmtlp: An R Package For Truncated Lasso Penalty
+# **glmtlp**: An R Package For Truncated Lasso Penalty
 
-Efficient procedures for constrained likelihood estimation and inference with truncated lasso penalty for linear, generalized linear, and Gaussian graphical models. This version supports regression from summary statistics and out-of-core model fitting using an ultrahigh-dimensional, multi-gigabyte datasets that cannot be loaded into memory. It's highly optimized and much more memory-efficient as compared to existing penalized regression packages like 'glmnet' and 'ncvreg'. 
+Efficient procedures for constrained likelihood estimation and inference with truncated lasso penalty for linear, generalized linear, and Gaussian graphical models. This version supports regression from summary statistics and out-of-core model fitting using an ultrahigh-dimensional, multi-gigabyte datasets that cannot be loaded into memory. It's highly optimized and much more memory-efficient as compared to existing penalized regression packages like [**glmnet**](https://github.com/cran/glmnet) and [**ncvreg**](https://github.com/pbreheny/ncvreg/). 
+
+Currently this package is in active development and will be released very soon.
 ## New features [Unreleased]
 
 - Add regression with summary data input
@@ -14,6 +16,11 @@ Efficient procedures for constrained likelihood estimation and inference with tr
 - Add sparse coefficient matrix output
 
 - Add implementation of Poisson regression
+
+## Highlights
+
+
+
 
 
 ## References
@@ -32,6 +39,6 @@ Zhu, Y., Shen, X., & Pan, W. (2020). On high-dimensional constrained maximum lik
 
 Zhu, Y. (2017). An augmented ADMM algorithm with application to the generalized lasso problem. *Journal of Computational and Graphical Statistics*, 26(1), 195-204. <https://doi.org/10.1080/10618600.2015.1114491>
 
-Part of the code is adapted from [`glmnet`](https://github.com/cran/glmnet), [`ncvreg`](https://github.com/pbreheny/ncvreg/), and [`biglasso`](https://github.com/YaohuiZeng/biglasso).
+Part of the code is adapted from [**glmnet**](https://github.com/cran/glmnet), [**ncvreg**](https://github.com/pbreheny/ncvreg/), and [**biglasso**](https://github.com/YaohuiZeng/biglasso).
 
 **Warm thanks to the authors of above open-sourced softwares.**
