@@ -9,3 +9,11 @@ call_bm_glm_solver <- function(X_mat, y_vec, obs_weights, pen_factors, kappa_vec
     .Call(`_glmtlp_call_bm_glm_solver`, X_mat, y_vec, obs_weights, pen_factors, kappa_vec, lambda_vec, delta_val, tau_val, tol_val, cd_maxit_val, standardize_val, ncores_val, family_val, method_val)
 }
 
+call_sum_solver <- function(XX_mat, Xy_vec, n_val, pen_factors, kappa_vec, lambda_vec, delta_val, tau_val, tol_val, cd_maxit_val, method_val) {
+    .Call(`_glmtlp_call_sum_solver`, XX_mat, Xy_vec, n_val, pen_factors, kappa_vec, lambda_vec, delta_val, tau_val, tol_val, cd_maxit_val, method_val)
+}
+
+call_bm_sum_solver <- function(XX_mat, Xy_vec, n_val, pen_factors, kappa_vec, lambda_vec, delta_val, tau_val, tol_val, cd_maxit_val, method_val) {
+    .Call(`_glmtlp_call_bm_sum_solver`, XX_mat, Xy_vec, n_val, pen_factors, kappa_vec, lambda_vec, delta_val, tau_val, tol_val, cd_maxit_val, method_val)
+}
+

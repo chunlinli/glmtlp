@@ -27,7 +27,8 @@ sumtlp <- function(XX, Xy, nobs,
                    tau = 0.5 * sqrt(log(nvars) / nobs),
                    delta = 2.0, tol = 1e-4,
                    penalty_factor = rep(1.0, nvars),
-                   cd_maxit = 10000, ...) {
+                   cd_maxit = 10000,
+                   eager = TRUE, return_data = FALSE, ...) {
 
     # Coersion
     this_call <- match.call()
@@ -42,12 +43,20 @@ sumtlp <- function(XX, Xy, nobs,
         stop("X should be a squared matrix")
     }
 
-    if (any(is.na(Xy)) || any(is.na(XX))) {
-        stop("Missing data (NA's) detected. Take actions
+    if (is.big.matrix(XX)) {
+        if (typeof(X) != "double") {
+            stop("X should be a big matrix of double")
+        }
+    } else {
+        if (any(is.na(Xy)) || any(is.na(XX))) {
+            stop("Missing data (NA's) detected. Take actions
                 (e.g., removing cases, removing features, imputation)
                 to eliminate missing data before passing
                 XX and Xy to the model")
+        }
     }
+
+
 
     # check penalty_factor
     if (method == "tlp-constrained") penalty_factor <- (penalty_factor != 0) * 1
@@ -80,10 +89,14 @@ sumtlp <- function(XX, Xy, nobs,
         } else {
             if (lambda[nlambda] >= lambda_max) {
                 message("null model, try smaller lambdas")
-                return(get_null_output_sum(
-                    this_call,
-                    family, method, penalty_factor
-                ))
+                out <- get_null_output_sum(
+                    this_call, method, penalty_factor
+                )
+                if (return_data) {
+                    out$XX <- XX
+                    out$Xy <- Xy
+                }
+                return(out)
             }
         }
     }
@@ -104,7 +117,7 @@ sumtlp <- function(XX, Xy, nobs,
             }
         }
     } else {
-        kappa <- -1
+        kappa <- NA
     }
 
     ## check tau, delta, tol, and maxiters:
@@ -114,38 +127,76 @@ sumtlp <- function(XX, Xy, nobs,
     tol <- as.double(tol)
     cd_maxit <- as.integer(cd_maxit)
 
-    fit <- sum_solver(
-        XX, Xy, nobs, penalty_factor, kappa, lambda, delta, tau, tol, cd_maxit, method
-    )
+    if (eager) {
+        if (is.big.matrix(XX)) {
+            fit <- call_bm_sum_solver(
+                XX@address, Xy, nobs, penalty_factor, kappa, lambda, delta, tau,
+                tol, cd_maxit, method
+            )
+        } else {
+            fit <- call_sum_solver(
+                XX, Xy, nobs, penalty_factor, kappa, lambda, delta, tau,
+                tol, cd_maxit, method
+            )
+        }
 
-    varnames <- colnames(XX)
-    if (is.null(varnames)) varnames <- paste("V", seq(nvars), sep = "")
-    rownames(fit$beta) <- varnames
-    if (method == "tlp-constrained") {
-        colnames(fit$beta) <- paste(kappa)
+        varnames <- colnames(XX)
+        if (is.null(varnames)) varnames <- paste("V", seq(nvars), sep = "")
+        rownames(fit$beta) <- varnames
+        if (method == "tlp-constrained") {
+            colnames(fit$beta) <- paste(kappa)
+        } else {
+            colnames(fit$beta) <- lambda_names(lambda)
+        }
+
+        out <- structure(
+            list(
+                beta = fit$beta,
+                method = method,
+                penalty_factor = penalty_factor,
+                loss = fit$loss,
+                call = this_call
+            ),
+            class = "glmtlp"
+        )
+        if (method == "tlp-constrained") {
+            out$kappa <- kappa
+            out$lambda <- lambda
+            out$tau <- tau
+        } else if (method == "tlp-regularized") {
+            out$lambda <- lambda
+            out$tau <- tau
+        } else {
+            out$lambda <- lambda
+        }
     } else {
-        colnames(fit$beta) <- lambda_names(lambda)
+        is_trained <- FALSE
+        out <- get_null_output(
+            this_call, method, penalty_factor, is_trained
+        )
     }
 
-    out <- structure(
+
+
+    if (return_data) {
+        out$XX <- XX
+        out$Xy <- Xy
+    }
+
+    out
+}
+
+
+get_null_output_sum <- function(this_call, method, penalty_factor, is_trained = TRUE) {
+    structure(
         list(
-            beta = fit$beta,
+            beta = ifelse(is_trained, 0, NA),
+            # this is wrong for binomial
             method = method,
             penalty_factor = penalty_factor,
-            loss = fit$loss,
-            call = this_call
+            call = this_call,
+            is_trained = is_trained
         ),
         class = "glmtlp"
     )
-    if (method == "tlp-constrained") {
-        out$kappa <- kappa
-        out$lambda <- lambda
-        out$tau <- tau
-    } else if (method == "tlp-regularized") {
-        out$lambda <- lambda
-        out$tau <- tau
-    } else {
-        out$lambda <- lambda
-    }
-    out
 }

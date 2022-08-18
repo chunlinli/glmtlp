@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef GLMTLP_HPP
-#define GLMTLP_HPP
+// #ifndef GLMTLP_HPP
+// #define GLMTLP_HPP
 
 #include "Rcpp.h"
 #include "RcppEigen.h"
@@ -32,4 +32,4 @@
 // [[Rcpp::depends(BH, bigmemory)]]
 
 
-#endif // GLMTLP_HPP
+// #endif // GLMTLP_HPP

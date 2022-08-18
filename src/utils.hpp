@@ -19,16 +19,84 @@
 
 #pragma once
 
-#ifndef UTILS_HPP
-#define UTILS_HPP
+// #ifndef UTILS_HPP
+// #define UTILS_HPP
 
 //#include "glmtlp.hpp"
+
 
 #include <vector>
 #include <string.h>
 #include <string>
 #include <cmath>
 #include <queue>
+
+#include "glmtlp.hpp"
+
+inline double soft_thresh(double init, double thresh)
+{
+    if (init > thresh)
+        init -= thresh;
+    else if (init < -thresh)
+        init += thresh;
+    else
+        init = 0.0;
+    return init;
+}
+
+inline double link(double mu, int family)
+{
+    switch (family)
+    {
+    case 1: // Family::Gaussian:
+        return mu;
+    case 2: // Family::Binomial:
+        return std::log(mu / (1.0 - mu));
+    case 3: // Family::Poisson:
+        return std::log(mu);
+    default:
+        return NAN;
+    }
+}
+
+inline double compute_deviance(const Eigen::VectorXd &y,
+                               const Eigen::VectorXd &eta,
+                               const Eigen::VectorXd &w,
+                               int family)
+{
+    switch (family)
+    {
+    case 1: // Family::Gaussian:
+    {
+        return (y - eta).array().square().matrix().dot(w);
+    }
+    case 2: // Family::Binomial:
+    {
+        Eigen::ArrayXd mu = 1.0 / (1.0 + exp(-eta.array()));
+        return -2.0 * w.dot((log(mu) * y.array() + log(1.0 - mu) * (1.0 - y.array())).matrix());
+    }
+    case 3: // Family::Poisson:
+    {
+        Eigen::ArrayXd mu = exp(eta.array());
+        return 2.0 * (w.array() * (log(y.array() / mu + 0.000000001) * y.array())).sum();
+    }
+
+    default:
+    {
+        return NAN;
+    }
+    }
+}
+
+inline void check_user_interrupt()
+{
+    Rcpp::checkUserInterrupt();
+}
+
+inline void glmtlp_warning(const std::string &msg)
+{
+    Rcpp::warning("[GLMTLP] " + msg);
+}
 
 
 //typedef Eigen::Triplet<double> T;
@@ -63,4 +131,4 @@
 //     return obj - bound;
 // }
 
-#endif // UTILS_HPP
+//#endif // UTILS_HPP

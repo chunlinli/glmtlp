@@ -8,7 +8,7 @@ library(glmtlp)
 # DATA GENERATION
 set.seed(1110)
 n <- 500
-p <- 100000
+p <- 10000
 X <- matrix(rnorm(n*p),n,p)
 Z <- rnorm(n)
 for(j in 1:p) {

@@ -167,8 +167,8 @@ void sum_solver(
                             break;
                         }
 
-                        if (family == Family::Gaussian)
-                            break;
+                        //if (family == 1)// Family::Gaussian)
+                        break;
 
                         /* check newton-raphson convergence */
                         // if ((b.col(k) - b_old).array().abs().maxCoeff() <= tol)
@@ -309,7 +309,7 @@ void sum_solver(
             const int kappa_max = kappa(nkappa - 1);
 
             std::vector<int> active_idx;
-            active_idx.reserve(p);
+            active_idx.reserve(std::min(p, n));
 
             for (int j = 0; j < p; ++j)
             {

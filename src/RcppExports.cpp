@@ -59,10 +59,54 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// call_sum_solver
+Rcpp::List call_sum_solver(Rcpp::NumericMatrix& XX_mat, Rcpp::NumericVector& Xy_vec, Rcpp::NumericVector& n_val, Rcpp::NumericVector& pen_factors, Rcpp::NumericVector& kappa_vec, Rcpp::NumericVector& lambda_vec, Rcpp::NumericVector& delta_val, Rcpp::NumericVector& tau_val, Rcpp::NumericVector& tol_val, Rcpp::NumericVector& cd_maxit_val, Rcpp::CharacterVector& method_val);
+RcppExport SEXP _glmtlp_call_sum_solver(SEXP XX_matSEXP, SEXP Xy_vecSEXP, SEXP n_valSEXP, SEXP pen_factorsSEXP, SEXP kappa_vecSEXP, SEXP lambda_vecSEXP, SEXP delta_valSEXP, SEXP tau_valSEXP, SEXP tol_valSEXP, SEXP cd_maxit_valSEXP, SEXP method_valSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::NumericMatrix& >::type XX_mat(XX_matSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector& >::type Xy_vec(Xy_vecSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector& >::type n_val(n_valSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector& >::type pen_factors(pen_factorsSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector& >::type kappa_vec(kappa_vecSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector& >::type lambda_vec(lambda_vecSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector& >::type delta_val(delta_valSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector& >::type tau_val(tau_valSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector& >::type tol_val(tol_valSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector& >::type cd_maxit_val(cd_maxit_valSEXP);
+    Rcpp::traits::input_parameter< Rcpp::CharacterVector& >::type method_val(method_valSEXP);
+    rcpp_result_gen = Rcpp::wrap(call_sum_solver(XX_mat, Xy_vec, n_val, pen_factors, kappa_vec, lambda_vec, delta_val, tau_val, tol_val, cd_maxit_val, method_val));
+    return rcpp_result_gen;
+END_RCPP
+}
+// call_bm_sum_solver
+Rcpp::List call_bm_sum_solver(SEXP& XX_mat, Rcpp::NumericVector& Xy_vec, Rcpp::NumericVector& n_val, Rcpp::NumericVector& pen_factors, Rcpp::NumericVector& kappa_vec, Rcpp::NumericVector& lambda_vec, Rcpp::NumericVector& delta_val, Rcpp::NumericVector& tau_val, Rcpp::NumericVector& tol_val, Rcpp::NumericVector& cd_maxit_val, Rcpp::CharacterVector& method_val);
+RcppExport SEXP _glmtlp_call_bm_sum_solver(SEXP XX_matSEXP, SEXP Xy_vecSEXP, SEXP n_valSEXP, SEXP pen_factorsSEXP, SEXP kappa_vecSEXP, SEXP lambda_vecSEXP, SEXP delta_valSEXP, SEXP tau_valSEXP, SEXP tol_valSEXP, SEXP cd_maxit_valSEXP, SEXP method_valSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP& >::type XX_mat(XX_matSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector& >::type Xy_vec(Xy_vecSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector& >::type n_val(n_valSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector& >::type pen_factors(pen_factorsSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector& >::type kappa_vec(kappa_vecSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector& >::type lambda_vec(lambda_vecSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector& >::type delta_val(delta_valSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector& >::type tau_val(tau_valSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector& >::type tol_val(tol_valSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector& >::type cd_maxit_val(cd_maxit_valSEXP);
+    Rcpp::traits::input_parameter< Rcpp::CharacterVector& >::type method_val(method_valSEXP);
+    rcpp_result_gen = Rcpp::wrap(call_bm_sum_solver(XX_mat, Xy_vec, n_val, pen_factors, kappa_vec, lambda_vec, delta_val, tau_val, tol_val, cd_maxit_val, method_val));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_glmtlp_call_glm_solver", (DL_FUNC) &_glmtlp_call_glm_solver, 14},
     {"_glmtlp_call_bm_glm_solver", (DL_FUNC) &_glmtlp_call_bm_glm_solver, 14},
+    {"_glmtlp_call_sum_solver", (DL_FUNC) &_glmtlp_call_sum_solver, 11},
+    {"_glmtlp_call_bm_sum_solver", (DL_FUNC) &_glmtlp_call_bm_sum_solver, 11},
     {NULL, NULL, 0}
 };
 

@@ -3,7 +3,7 @@
 #ifndef SOLVER_HPP
 #define SOLVER_HPP
 
-#include "glmtlp.hpp"
+#include "Eigen/Sparse"
 
 void glm_solver(
     double *X_ptr,
