@@ -2,9 +2,19 @@
 
 An R Package For Truncated Lasso Penalty
 
+## New features [Unreleased]
 
+- Add regression with summary data input
 
+- Add inference function
 
+- Add OpenMP support
+
+- Add out-of-memory computation support
+
+- Add sparse coefficient matrix output
+
+- Add implementation of Poisson regression
 
 
 ## References
