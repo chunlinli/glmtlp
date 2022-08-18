@@ -21,7 +21,7 @@ Suggests:
     rmarkdown,
     knitr,
     testthat (>= 3.0.0)
-Description: Extremely efficient procedures for constrained likelihood estimation with truncated lasso penalty for linear, generalized linear, and Gaussian graphical models. This version supports regression from summary statistics and out-of-core model fitting using an ultrahigh-dimensional, multi-gigabyte datasets that cannot be loaded into memory. It's highly optimized and much more memory-efficient as compared to existing penalized regression packages like 'glmnet' and 'ncvreg'. 
+Description: Extremely efficient procedures for constrained likelihood estimation and inference with truncated lasso penalty for linear, generalized linear, and Gaussian graphical models. This version supports regression from summary statistics and out-of-core model fitting using an ultrahigh-dimensional, multi-gigabyte datasets that cannot be loaded into memory. It's highly optimized and much more memory-efficient as compared to existing penalized regression packages like 'glmnet' and 'ncvreg'. 
 SystemRequirements: C++14
 Encoding: UTF-8
 License: GPL-3 + file LICENSE
