@@ -1,7 +1,7 @@
 # **glmtlp**: An R Package For Truncated Lasso Penalty
 
 <p align="center">
-  <img src="GLMTLP.png" alt="glmtlp" width="400"/>
+  <img src="GLMTLP.png" alt="glmtlp" width="500"/>
 </p>
 
 Efficient procedures for constrained likelihood estimation and inference with truncated lasso penalty for linear, generalized linear, and Gaussian graphical models. 
