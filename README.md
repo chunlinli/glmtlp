@@ -1,9 +1,15 @@
 # **glmtlp**: An R Package For Truncated Lasso Penalty
 
-Efficient procedures for constrained likelihood estimation and inference with truncated lasso penalty for linear, generalized linear, and Gaussian graphical models. This version supports regression from summary statistics and out-of-core model fitting using an ultrahigh-dimensional, multi-gigabyte datasets that cannot be loaded into memory. It's highly optimized and much more memory-efficient as compared to existing penalized regression packages like [**glmnet**](https://github.com/cran/glmnet) and [**ncvreg**](https://github.com/pbreheny/ncvreg/). 
+<p align="center">
+  <img src="GLMTLP.png" alt="glmtlp" width="400"/>
+</p>
+
+Efficient procedures for constrained likelihood estimation and inference with truncated lasso penalty for linear, generalized linear, and Gaussian graphical models. 
 
 Currently this package is in active development and will be released very soon.
 ## New features [Unreleased]
+
+This version supports regression from summary statistics and out-of-core model fitting using an ultrahigh-dimensional, multi-gigabyte datasets that cannot be loaded into memory. It's highly optimized and much more memory-efficient as compared to existing penalized regression packages like [**glmnet**](https://github.com/cran/glmnet) and [**ncvreg**](https://github.com/pbreheny/ncvreg/). 
 
 - Add regression with summary data input
 
@@ -19,7 +25,17 @@ Currently this package is in active development and will be released very soon.
 
 ## Highlights
 
+constrained likelihood approach, inference
 
+an improved algorithm 
+
+any GLM
+
+summary data
+
+big data, memory management
+
+visualization
 
 
 
