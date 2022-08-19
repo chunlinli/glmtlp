@@ -17,13 +17,12 @@
 #     along with this program. If not, see <https://www.gnu.org/licenses/>.
 # **********/
 
-# H0 is index to test: null is "beta[H0] == 0"
-# this function needs improvement:
-# it is not efficient
-# it is misses corner cases
-test_glmtlp <- function(X, y, H0, penalty_factor = NULL,
+
+test_glmtlp <- function(X, y, test_null, penalty_factor = NULL,
+                        family = c("gaussian", "binomial", "poisson"),
                         model_selection = c("bic", "cv"), ...) {
     this_call <- match.call(expand.dots = TRUE)
+    family <- match.arg(family)
     model_selection <- match.arg(model_selection)
 
     xdim <- dim(X)
@@ -31,22 +30,26 @@ test_glmtlp <- function(X, y, H0, penalty_factor = NULL,
         stop("X should be a matrix")
     }
 
+    nobs <- xdim[1]
     nvars <- xdim[2]
-    if (length(H0) < 1) stop("please provide null hypothesis H0")
-    H0 <- as.integer(unique(H0))
-    if (any(H0 < 1 | max(H0) > nvars)) stop("H0 must be between 1:nvars")
+    if (length(test_null) < 1) stop("please provide null hypothesis")
+    test_null <- as.integer(unique(test_null))
+    if (any(test_null < 1 | test_null > nvars)) {
+        stop("tested variable must be between [1, nvars]")
+    }
     if (is.null(penalty_factor)) {
         penalty_factor <- rep(1, nvars)
     } else {
-        if (any(penalty_factor[H0] != 0)) {
-            message("penalty_factor of tested var is not 0, setting it to 0")
+        if (any(penalty_factor[test_null] != 0)) {
+            message("penalty_factor of tested variable is not 0,
+            setting to 0")
         }
     }
-    penalty_factor[H0] <- 0
+    penalty_factor[test_null] <- 0
 
     if (model_selection == "cv") {
         cv_object <- cv_glmtlp(
-            X = X, y = y,
+            X = X, y = y, family = family,
             penalty_factor = penalty_factor,
             method = "tlp-constrained", ...
         )
@@ -56,7 +59,7 @@ test_glmtlp <- function(X, y, H0, penalty_factor = NULL,
         lambda <- cv_object$lambda
     } else {
         fit1 <- glmtlp(
-            X = X, y = y,
+            X = X, y = y, family = family,
             penalty_factor = penalty_factor,
             method = "tlp-constrained", ...
         )
@@ -67,24 +70,35 @@ test_glmtlp <- function(X, y, H0, penalty_factor = NULL,
         lambda <- fit1$lambda
     }
     fit0 <- glmtlp(
-        X = X[, -H0], y = y,
-        penalty_factor = penalty_factor[-H0],
+        X = X, y = y, family = family,
+        penalty_factor = penalty_factor,
         lambda = lambda,
         kappa = kappa_min,
-        method = "tlp-constrained", ...
+        method = "tlp-constrained",
+        exclude = test_null,
+        ...
     )
     dev0 <- fit0$deviance[idx_min]
-    test_stat <- dev0 - dev1
-    pvalue <- pchisq(test_stat, df = length(H0), lower.tail = FALSE)
+
+    # test statistic for gaussian is not defined in this way
+    log_like_ratio <- ifelse(family == "gaussian",
+        (dev0 - dev1) * (nobs - kappa_min - 1) / dev1,
+        dev0 - dev1
+    )
+    pvalue <- pchisq(log_like_ratio,
+        df = length(test_null),
+        lower.tail = FALSE
+    )
 
     structure(list(
         call = this_call,
         pvalue = pvalue,
-        test_stat = test_stat,
+        log_like_ratio = log_like_ratio,
         dev1 = dev1,
         dev0 = dev0,
+        df = length(test_null),
         kappa_min = kappa_min,
-        H0 = H0,
+        test_null = test_null,
         model_selection = model_selection,
         penalty_factor = penalty_factor
     ),

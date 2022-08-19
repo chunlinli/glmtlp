@@ -165,6 +165,7 @@ glmtlp <- function(X, y, family = c("gaussian", "binomial", "poisson"),
                    tau = 0.5 * sqrt(log(nvars) / nobs),
                    delta = 2.0, tol = 1e-4,
                    weights = NULL, penalty_factor = rep(1.0, nvars),
+                   exclude = NULL,
                    cd_maxit = 10000, ncores = 1,
                    standardize = FALSE, eager = TRUE, return_data = FALSE, ...) {
     this_call <- match.call()
@@ -253,7 +254,29 @@ glmtlp <- function(X, y, family = c("gaussian", "binomial", "poisson"),
         weights <- weights * nobs / sum(weights)
     }
 
+    ## handle excluded variables
+    if (!is.na(exclude)) {
+        exclude <- as.integer(unique(exclude))
+        if (any(exclude < 1 | exclude > nvars)) {
+            stop("excluded variable index must be in [1, nvars]")
+        }
+        if (length(exclude) == nvars) {
+            message("null model, all variables are excluded")
+            out <- get_null_output(
+                this_call,
+                y, family, method, penalty_factor, weights, exclude
+            )
+            if (return_data) {
+                out$X <- X
+                out$y <- y
+            }
+            return(out)
+        }
+        penalty_factor[exclude] <- Inf
+    }
+
     ## check/setup lambda and kappa
+    ## need to handle big.matrix case
     if (is.null(lambda)) {
         nlambda <- as.integer(nlambda)
         if (nlambda < 2) stop("nlambda must be at least 2")
@@ -275,7 +298,7 @@ glmtlp <- function(X, y, family = c("gaussian", "binomial", "poisson"),
                 message("null model, try smaller lambdas")
                 out <- get_null_output(
                     this_call,
-                    y, family, method, penalty_factor, weights
+                    y, family, method, penalty_factor, weights, exclude
                 )
                 if (return_data) {
                     out$X <- X
@@ -347,6 +370,7 @@ glmtlp <- function(X, y, family = c("gaussian", "binomial", "poisson"),
                 method = method,
                 penalty_factor = penalty_factor,
                 weights = weights,
+                exclude = exclude,
                 deviance = fit$deviance,
                 call = this_call,
                 is_trained = TRUE
@@ -367,7 +391,7 @@ glmtlp <- function(X, y, family = c("gaussian", "binomial", "poisson"),
         is_trained <- FALSE
         out <- get_null_output(
             this_call,
-            y, family, method, penalty_factor, weights, is_trained
+            y, family, method, penalty_factor, weights, exclude, is_trained
         )
     }
 
@@ -382,7 +406,8 @@ glmtlp <- function(X, y, family = c("gaussian", "binomial", "poisson"),
 
 
 get_null_output <- function(this_call, y, family, method,
-                            penalty_factor, weights, is_trained = TRUE) {
+                            penalty_factor, weights, exclude,
+                            is_trained = TRUE) {
     structure(
         list(
             beta = ifelse(is_trained, 0, NA),
@@ -392,6 +417,7 @@ get_null_output <- function(this_call, y, family, method,
             method = method,
             penalty_factor = penalty_factor,
             weights = weights,
+            exclude = exclude,
             call = this_call,
             is_trained = is_trained
         ),

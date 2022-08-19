@@ -27,6 +27,7 @@ sumtlp <- function(XX, Xy, nobs,
                    tau = 0.5 * sqrt(log(nvars) / nobs),
                    delta = 2.0, tol = 1e-4,
                    penalty_factor = rep(1.0, nvars),
+                   exclude = NULL,
                    cd_maxit = 10000,
                    eager = TRUE, return_data = FALSE, ...) {
 
@@ -69,6 +70,26 @@ sumtlp <- function(XX, Xy, nobs,
         ))
     }
 
+    ## handle excluded variables
+    if (!is.na(exclude)) {
+        exclude <- as.integer(unique(exclude))
+        if (any(exclude < 1 | exclude > nvars)) {
+            stop("excluded variable index must be in [1, nvars]")
+        }
+        if (length(exclude) == nvars) {
+            message("null model, all variables are excluded")
+            out <- get_null_output_sum(
+                this_call, method, penalty_factor, exclude
+            )
+            if (return_data) {
+                out$XX <- XX
+                out$Xy <- Xy
+            }
+            return(out)
+        }
+        penalty_factor[exclude] <- Inf
+    }
+
     ## check/setup lambda and kappa
     if (is.null(lambda)) {
         nlambda <- as.integer(nlambda)
@@ -90,7 +111,7 @@ sumtlp <- function(XX, Xy, nobs,
             if (lambda[nlambda] >= lambda_max) {
                 message("null model, try smaller lambdas")
                 out <- get_null_output_sum(
-                    this_call, method, penalty_factor
+                    this_call, method, penalty_factor, exclude
                 )
                 if (return_data) {
                     out$XX <- XX
@@ -154,6 +175,7 @@ sumtlp <- function(XX, Xy, nobs,
                 beta = fit$beta,
                 method = method,
                 penalty_factor = penalty_factor,
+                exclude = exclude,
                 loss = fit$loss,
                 call = this_call
             ),
@@ -172,7 +194,7 @@ sumtlp <- function(XX, Xy, nobs,
     } else {
         is_trained <- FALSE
         out <- get_null_output(
-            this_call, method, penalty_factor, is_trained
+            this_call, method, penalty_factor, exclude, is_trained
         )
     }
 
@@ -187,13 +209,15 @@ sumtlp <- function(XX, Xy, nobs,
 }
 
 
-get_null_output_sum <- function(this_call, method, penalty_factor, is_trained = TRUE) {
+get_null_output_sum <- function(this_call, method, penalty_factor,
+                                exclude, is_trained = TRUE) {
     structure(
         list(
             beta = ifelse(is_trained, 0, NA),
             # this is wrong for binomial
             method = method,
             penalty_factor = penalty_factor,
+            exclude = exclude,
             call = this_call,
             is_trained = is_trained
         ),
