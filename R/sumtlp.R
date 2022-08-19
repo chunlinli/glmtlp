@@ -71,7 +71,7 @@ sumtlp <- function(XX, Xy, nobs,
     }
 
     ## handle excluded variables
-    if (!is.na(exclude)) {
+    if (!is.null(exclude)) {
         exclude <- as.integer(unique(exclude))
         if (any(exclude < 1 | exclude > nvars)) {
             stop("excluded variable index must be in [1, nvars]")
