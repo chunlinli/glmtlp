@@ -344,7 +344,7 @@ void sum_solver(
                 int df = kappa(kk);
                 if (df > df_max)
                 {
-                    break;
+                    df = df_max;
                 }
 
                 // TODO: newton step
