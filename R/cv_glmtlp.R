@@ -107,12 +107,16 @@
 #' @importFrom stats sd
 #' @export cv_glmtlp
 
-cv_glmtlp <- function(X, y, ...,
-                      nfolds = 10, obs_fold = NULL,
+cv_glmtlp <- function(X, y, family = c("gaussian", "binomial", "poisson"),
+                      method = c("tlp-constrained", "tlp-regularized", "l1-regularized"),
+                      ..., nfolds = 10, obs_fold = NULL,
                       seed = NULL, ncores = 1) {
     cv_call <- match.call(expand.dots = TRUE)
 
-    fit <- glmtlp(X = X, y = y, ncores = ncores, ...) # ncores = ncores may not be good
+    fit <- glmtlp(
+        X = X, y = y, family = family, method = method,
+        ncores = ncores, ...
+    ) # ncores = ncores may not be good
     nobs <- nrow(X)
     family <- fit$family
     method <- fit$method
@@ -162,13 +166,13 @@ cv_glmtlp <- function(X, y, ...,
                 weights = 1 * (obs_fold != fold),
                 lambda = lambda, kappa = kappa,
                 family = family, method = method,
-                ncores = 1
+                ncores = 1, ...
             )
             yhat <- predict.glmtlp(fit_fold,
                 X = X[obs_fold == fold, , drop = FALSE],
                 type = "response"
             )
-            loss <- loss_glmtlp(y[obs_fold == fold], yhat, family)
+            loss <- loss_glmtlp(y = y[obs_fold == fold], yhat = yhat, family = family)
             loss
         }
     } else {
@@ -178,13 +182,13 @@ cv_glmtlp <- function(X, y, ...,
                 weights = 1 * (obs_fold != fold),
                 lambda = lambda, kappa = kappa,
                 family = family, method = method,
-                ncores = 1
+                ncores = 1, ...
             )
             yhat <- predict.glmtlp(fit_fold,
                 X = X[obs_fold == fold, , drop = FALSE],
                 type = "response"
             )
-            loss <- loss_glmtlp(y[obs_fold == fold], yhat, family)
+            loss <- loss_glmtlp(y = y[obs_fold == fold], yhat = yhat, family = family)
             cv_res <- rbind(cv_res, loss)
         }
     }
@@ -199,7 +203,7 @@ cv_glmtlp <- function(X, y, ...,
         cv_mean = cv_mean,
         cv_se = cv_se,
         idx_min = idx_min,
-        null_dev = loss_glmtlp(y, rep(mean(y), nobs), family)
+        null_dev = loss_glmtlp(y = y, yhat = rep(mean(y), nobs), family = family)
     ),
     class = "cv_glmtlp"
     )

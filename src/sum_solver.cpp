@@ -299,12 +299,6 @@ void sum_solver(
         if (method == 3)
         {
             // TODO
-            std::vector<int> sp_beta_idx(nkappa, 0);
-            for (int kk = 1; kk < nkappa; ++kk)
-            {
-                sp_beta_idx[kk] = (int) std::round(sp_beta_idx[kk-1] + kappa(kk - 1));
-            }
-            sp_beta_list.resize((int) std::round(kappa.sum()));
 
             const int kappa_max = kappa(nkappa - 1);
 
@@ -313,17 +307,24 @@ void sum_solver(
 
             for (int j = 0; j < p; ++j)
             {
-                if (rho0(j) == 0.0)
+                if (rho0(j) < tol)
                 {
                     active_idx.push_back(j);
                 }
             }
             int support_size = active_idx.size();
 
+            std::vector<int> sp_beta_idx(nkappa, 0);
+            for (int kk = 1; kk < nkappa; ++kk)
+            {
+                sp_beta_idx[kk] = (int) std::round(sp_beta_idx[kk-1] + support_size + kappa(kk - 1));
+            }
+            sp_beta_list.resize((int) std::round(kappa.sum()) + ntune * support_size);
+
             std::priority_queue<std::pair<double, int>> queue;
             for (int j = 0; j < p; ++j)
             {
-                if (std::abs(beta_new(j)) > tol && rho0(j) != 0.0)
+                if (std::abs(beta_new(j)) > tol && rho0(j) > tol)
                 {
                     queue.push(std::pair<double, int>(std::abs(beta_new(j)), j));
                 }

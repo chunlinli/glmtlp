@@ -72,7 +72,7 @@
 #'
 #' # Binomial
 #' X <- matrix(rnorm(100 * 20), 100, 20)
-#' y <- sample(c(0,1), 100, replace = TRUE)
+#' y <- sample(c(0, 1), 100, replace = TRUE)
 #' fit <- glmtlp(X, y, family = "binomial", penalty = "l1")
 #' coef(fit)
 #' predict(fit, X = X[1:5, ], type = "response")
@@ -85,29 +85,45 @@
 #' @export
 #' @export predict.glmtlp
 
-predict.glmtlp <- function(object, X, type=c("link", "response", "class", "coefficients", "numnz", "varnz"),
-                           lambda=NULL, kappa=NULL,
-                           which=1:(ifelse(object$method == "constrained-tlp", length(object$kappa), length(object$lambda))), ...) {
+predict.glmtlp <- function(object, X,
+                           type = c("link", "response", "class", "coefficients", "numnz", "varnz"),
+                           lambda = NULL, kappa = NULL,
+                           which = 1:(ifelse(object$method == "tlp-constrained",
+                             length(object$kappa), length(object$lambda)
+                           )), ...) {
   type <- match.arg(type)
-  coefs <- coef.glmtlp(object, lambda=lambda, kappa=kappa, which=which, drop=FALSE)
-  if (type=="coefficients") return(coefs)
+  coefs <- coef.glmtlp(object, lambda = lambda, kappa = kappa, which = which, drop = FALSE)
+  if (type == "coefficients") {
+    return(coefs)
+  }
 
-  intercept <- coefs[1,]
-  beta <- coefs[-1, , drop=FALSE]
+  intercept <- coefs[1, ]
+  beta <- coefs[-1, , drop = FALSE]
 
-  if (type=="numnz") return(apply(beta!=0, 2, sum))
-  if (type=="varnz") return(apply(beta!=0, 2, FUN=which))
+  if (type == "numnz") {
+    return(apply(beta != 0, 2, sum))
+  }
+  if (type == "varnz") {
+    return(apply(beta != 0, 2, FUN = which))
+  }
   eta <- sweep(X %*% beta, 2, intercept, "+")
-  if (type=="link" || object$family=="gaussian") return(drop(eta))
+  if (type == "link" || object$family == "gaussian") {
+    return(drop(eta))
+  }
   resp <- switch(object$family,
-                 binomial = plogis(eta),
-                 poisson = exp(eta))
-  if (type=="response") return(drop(resp))
-  if (type=="class") {
-    if (object$family=="binomial") {
-      return(drop(1*(eta>0)))
+    binomial = plogis(eta),
+    poisson = exp(eta)
+  )
+  if (type == "response") {
+    return(drop(resp))
+  }
+  if (type == "class") {
+    if (object$family == "binomial") {
+      return(drop(1 * (eta > 0)))
     } else {
-      stop("type='class' can only be used with family='binomial'", call.=FALSE)
+      stop("type='class' can only be used with family='binomial'",
+        call. = FALSE
+      )
     }
   }
 }
@@ -121,49 +137,50 @@ predict.glmtlp <- function(object, X, type=c("link", "response", "class", "coeff
 #' @export
 #' @export coef.glmtlp
 #'
-coef.glmtlp <- function(object, lambda=NULL, kappa=NULL,
-                        which=1:(ifelse(object$method == "constrained-tlp",
-                                        length(object$kappa), length(object$lambda))),
-                        drop=TRUE, ...) {
-  if (object$method == "constrained-tlp") {
+coef.glmtlp <- function(object, lambda = NULL, kappa = NULL,
+                        which = 1:(ifelse(object$method == "tlp-constrained",
+                          length(object$kappa), length(object$lambda)
+                        )),
+                        drop = TRUE, ...) {
+  if (object$method == "tlp-constrained") {
     if (!is.null(kappa)) {
-      if (max(kappa) > max(object$kappa) | min(kappa) < min(object$kappa)) {
-        stop('Supplied kappa value(s) are outside the range of the model fit.', call.=FALSE)
+      if (max(kappa) > max(object$kappa) || min(kappa) < min(object$kappa)) {
+        stop("Supplied kappa value(s) are outside the range of the model fit.", call. = FALSE)
       }
       ind <- approx(object$kappa, seq(object$kappa), kappa)$y
       l <- floor(ind)
       r <- ceiling(ind)
       w <- ind %% 1
-      beta <- (1-w)*object$beta[, l, drop=FALSE] + w*object$beta[, r, drop=FALSE]
-      intercept <- (1-w)*object$intercept[l] + w*object$intercept[r]
+      beta <- (1 - w) * object$beta[, l, drop = FALSE] + w * object$beta[, r, drop = FALSE]
+      intercept <- (1 - w) * object$intercept[l] + w * object$intercept[r]
       colnames(beta) <- kappa
-    }
-    else {
-      beta <- object$beta[, which, drop=FALSE]
+    } else {
+      beta <- object$beta[, which, drop = FALSE]
       intercept <- object$intercept[which]
     }
   } else {
     if (!is.null(lambda)) {
-      if (max(lambda) > max(object$lambda) | min(lambda) < min(object$lambda)) {
-        stop('Supplied lambda value(s) are outside the range of the model fit.', call.=FALSE)
+      if (max(lambda) > max(object$lambda) || min(lambda) < min(object$lambda)) {
+        stop("Supplied lambda value(s) are outside the range of the model fit.",
+          call. = FALSE
+        )
       }
       ind <- approx(object$lambda, seq(object$lambda), lambda)$y
       l <- floor(ind)
       r <- ceiling(ind)
       w <- ind %% 1
-      beta <- (1-w)*object$beta[, l, drop=FALSE] + w*object$beta[, r, drop=FALSE]
-      intercept <- (1-w)*object$intercept[l] + w*object$intercept[r]
+      beta <- (1 - w) * object$beta[, l, drop = FALSE] + w * object$beta[, r, drop = FALSE]
+      intercept <- (1 - w) * object$intercept[l] + w * object$intercept[r]
       colnames(beta) <- lambda_names(lambda)
-    }
-    else {
-      beta <- object$beta[, which, drop=FALSE]
+    } else {
+      beta <- object$beta[, which, drop = FALSE]
       intercept <- object$intercept[which]
     }
   }
 
   if (drop) {
-    return (drop(rbind(intercept, beta)))
+    return(drop(rbind(intercept, beta)))
   } else {
-    return (rbind(intercept, beta))
+    return(rbind(intercept, beta))
   }
 }
