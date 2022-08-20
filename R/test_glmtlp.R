@@ -63,7 +63,8 @@ test_glmtlp <- function(X, y, test_null, penalty_factor = NULL,
             penalty_factor = penalty_factor,
             method = "tlp-constrained", ...
         )
-        bic <- fit1$deviance + log(nrow(X)) * fit1$kappa
+        bic <- fit1$deviance +
+            log(nrow(X)) * (sum(fit1$penalty_factor == 0) + fit1$kappa + 1)
         idx_min <- which.min(bic)[1]
         dev1 <- fit1$deviance[idx_min]
         kappa_min <- fit1$kappa[idx_min]
