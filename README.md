@@ -17,7 +17,7 @@ This version supports regression from summary statistics and out-of-core model f
 
 - Add OpenMP support
 
-- Add out-of-memory computation support
+- Add external memory computation support
 
 - Add sparse coefficient matrix output
 
