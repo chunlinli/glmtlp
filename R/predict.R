@@ -110,6 +110,10 @@ predict.glmtlp <- function(object, X,
   if (type == "link" || object$family == "gaussian") {
     return(drop(eta))
   }
+
+  # DEBUG
+  eta <- as.matrix(eta)
+
   resp <- switch(object$family,
     binomial = plogis(eta),
     poisson = exp(eta)
