@@ -51,35 +51,37 @@ test_glmtlp <- function(X, y, test_null, penalty_factor = NULL,
         cv_object <- cv_glmtlp(
             X = X, y = y, family = family,
             penalty_factor = penalty_factor,
-            method = "tlp-constrained", ...
+            ...
         )
         idx_min <- cv_object$idx_min
         dev1 <- cv_object$fit$deviance[idx_min]
         kappa_min <- cv_object$kappa_min
         lambda <- cv_object$lambda
     } else {
-        fit1 <- glmtlp(
-            X = X, y = y, family = family,
-            penalty_factor = penalty_factor,
-            method = "tlp-constrained", ...
-        )
-        bic <- fit1$deviance +
-            log(nrow(X)) * (sum(fit1$penalty_factor == 0) + fit1$kappa + 1)
-        idx_min <- which.min(bic)[1]
-        dev1 <- fit1$deviance[idx_min]
-        kappa_min <- fit1$kappa[idx_min]
-        lambda <- fit1$lambda
+        # fit1 <- glmtlp(
+        #     X = X, y = y, family = family,
+        #     penalty_factor = penalty_factor,
+        #     ...
+        # )
+
+# TODO: this BIC formula is wrong for Gaussian        
+        # bic <- fit1$deviance/min(fit1$deviance) +
+        #     log(nrow(X)) * (sum(fit1$penalty_factor == 0) + fit1$kappa + 1)
+        
+        # idx_min <- which.min(bic)[1]
+        # dev1 <- fit1$deviance[idx_min]
+        # kappa_min <- fit1$kappa[idx_min]
+        # lambda <- fit1$lambda
     }
     fit0 <- glmtlp(
         X = X, y = y, family = family,
         penalty_factor = penalty_factor,
         lambda = lambda,
         kappa = kappa_min,
-        method = "tlp-constrained",
         exclude = test_null,
         ...
     )
-    dev0 <- fit0$deviance[idx_min]
+    dev0 <- fit0$deviance[2]
 
     # test statistic for gaussian is not defined in this way
     log_like_ratio <- ifelse(family == "gaussian",
