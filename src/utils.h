@@ -31,6 +31,7 @@
 #include <cmath>
 #include <queue>
 
+#include "macros.h"
 #include "glmtlp.h"
 
 enum class Family
@@ -48,7 +49,8 @@ enum class Method
     CTLP
 };
 
-inline double soft_thresh(double init, double thresh)
+STRONG_INLINE
+double soft_thresh(double init, double thresh)
 {
     if (init > thresh)
         init -= thresh;
@@ -59,7 +61,8 @@ inline double soft_thresh(double init, double thresh)
     return init;
 }
 
-inline double link(double mu, Family family)
+STRONG_INLINE
+double link(double mu, Family family)
 {
     switch (family)
     {
@@ -74,7 +77,8 @@ inline double link(double mu, Family family)
     }
 }
 
-inline double compute_deviance(const Eigen::VectorXd &y,
+STRONG_INLINE
+double compute_deviance(const Eigen::VectorXd &y,
                                const Eigen::VectorXd &eta,
                                const Eigen::VectorXd &w,
                                Family family)
@@ -103,12 +107,14 @@ inline double compute_deviance(const Eigen::VectorXd &y,
     }
 }
 
-inline void check_user_interrupt()
+STRONG_INLINE
+void check_user_interrupt()
 {
     Rcpp::checkUserInterrupt();
 }
 
-inline void glmtlp_warning(const std::string &msg)
+STRONG_INLINE
+void glmtlp_warning(const std::string &msg)
 {
     Rcpp::warning("[GLMTLP] " + msg);
 }
