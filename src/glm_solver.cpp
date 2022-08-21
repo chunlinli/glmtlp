@@ -24,7 +24,6 @@
 
 #include "glmtlp_omp.h"
 
-
 void glm_solver(
     const double *X_ptr,
     const double *y_ptr,
@@ -50,7 +49,7 @@ void glm_solver(
 {
     // setup OpenMP
 #ifdef GLMTLP_OMP_H_
-    if(ncores < 1) 
+    if (ncores < 1)
     {
         ncores = omp_get_num_procs();
     }
@@ -149,12 +148,12 @@ void glm_solver(
     {
         check_user_interrupt();
 
-        std::copy(rho0.data(), rho0.data() + p, rho.data());
-        // warm start (this may be a bit inefficient for Lasso)
-        beta_new = beta_old;
-        intercept_new = intercept_old;
-        rw = rw_old;
-        eta = eta_old;
+        // std::copy(rho0.data(), rho0.data() + p, rho.data());
+        // // warm start (this may be a bit inefficient for Lasso)
+        // beta_new = beta_old;
+        // intercept_new = intercept_old;
+        // rw = rw_old;
+        // eta = eta_old;
 
         /* beginning of varaible screening module */
         double cutoff = 2.0 * lambda(k) - lambda(k - 1);
@@ -391,7 +390,7 @@ void glm_solver(
 
                     /* handling of saturated model */
                     if (family != Family::Gaussian && compute_deviance(y, eta, w0, family) < 0.01 * null_deviance)
-                    //if (family != 1 && compute_deviance(y, eta, w0, family) < 0.01 * null_deviance)
+                    // if (family != 1 && compute_deviance(y, eta, w0, family) < 0.01 * null_deviance)
                     {
                         EXIT_FLAG++;
 
@@ -425,7 +424,7 @@ void glm_solver(
             }
 
             if (method == Method::Lasso || EXIT_FLAG)
-            //if (method == 1 || EXIT_FLAG)
+            // if (method == 1 || EXIT_FLAG)
             {
                 break;
             }
@@ -484,9 +483,9 @@ void glm_solver(
             std::vector<int> sp_beta_idx(nkappa, 0);
             for (int kk = 1; kk < nkappa; ++kk)
             {
-                sp_beta_idx[kk] = (int) std::round(sp_beta_idx[kk-1] + support_size + kappa(kk - 1));
+                sp_beta_idx[kk] = (int)std::round(sp_beta_idx[kk - 1] + support_size + kappa(kk - 1));
             }
-            sp_beta_list.resize((int) std::round(kappa.sum()) + ntune * support_size);
+            sp_beta_list.resize((int)std::round(kappa.sum()) + ntune * support_size);
 
             std::priority_queue<std::pair<double, int>> queue;
             for (int j = 0; j < p; ++j)
@@ -518,9 +517,9 @@ void glm_solver(
                 Eigen::VectorXd mu = Eigen::VectorXd::Zero(n);
                 Eigen::VectorXd z = y;
                 Eigen::VectorXd beta_work = Eigen::VectorXd::Zero(p);
+                double intercept_work;
 
                 // eta = Eigen::VectorXd::Ones(n) * b0(0);
-
 
                 for (int it_newton = 0; it_newton < 15; ++it_newton)
                 {
@@ -614,7 +613,7 @@ void glm_solver(
                     {
                         beta_work(active_idx[jj]) = beta_work_(jj);
                     }
-                    intercept_new = beta_work_(support_size + df);
+                    intercept_work = beta_work_(support_size + df);
 
                     if (family == Family::Gaussian)
                         break;
@@ -633,16 +632,16 @@ void glm_solver(
                 if (dev_ + tol < dev(kk))
                 {
                     dev(kk) = dev_;
-                    b0(kk) = intercept_new;
+                    b0(kk) = intercept_work;
                     // b.col(kk) = beta_work;
                     int i = 0;
                     for (int j = 0; j < p; ++j)
                     {
                         if (std::abs(beta_work(j)) > tol)
                         {
-                            
+
                             sp_beta_list[sp_beta_idx[kk] + i] = Eigen::Triplet<double>(j, kk, beta_work(j));
-                            //sp_beta_list.push_back(Eigen::Triplet<double>(j, kk, beta_work(j)));
+                            // sp_beta_list.push_back(Eigen::Triplet<double>(j, kk, beta_work(j)));
                             ++i;
                         }
                     }
