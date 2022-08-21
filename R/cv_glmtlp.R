@@ -109,12 +109,14 @@
 
 cv_glmtlp <- function(X, y, family = c("gaussian", "binomial", "poisson"),
                       method = c("tlp-constrained", "tlp-regularized", "l1-regularized"),
+                      lambda = NULL, kappa = NULL,
                       ..., nfolds = 10, obs_fold = NULL,
                       seed = NULL, ncores = 1) {
     cv_call <- match.call(expand.dots = TRUE)
 
     fit <- glmtlp(
         X = X, y = y, family = family, method = method,
+        lambda = lambda, kappa = kappa,
         ncores = ncores, ...
     ) # ncores = ncores may not be good
     nobs <- nrow(X)
