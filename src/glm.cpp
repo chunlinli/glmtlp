@@ -23,19 +23,6 @@
 #include "utils.h"
 #include "solver.h"
 
-// enum class Family
-// {
-//     Gaussian,
-//     Binomial,
-//     Poisson
-// };
-
-// enum class Method
-// {
-//     Lasso,
-//     RTLP,
-//     CTLP
-// };
 
 // [[Rcpp::export]]
 Rcpp::List call_glm_solver(Rcpp::NumericMatrix &X_mat,
@@ -54,16 +41,16 @@ Rcpp::List call_glm_solver(Rcpp::NumericMatrix &X_mat,
                            Rcpp::CharacterVector &method_val)
 {
     // input
-    int family = strcmp(family_val[0], "gaussian") == 0
-                     ? 1
+    Family family = strcmp(family_val[0], "gaussian") == 0
+                     ? Family::Gaussian
                  : strcmp(family_val[0], "binomial") == 0
-                     ? 2
-                     : 3;
-    int method = strcmp(method_val[0], "l1-regularized") == 0
-                     ? 1
+                     ? Family::Binomial
+                     : Family::Poisson;
+    Method method = strcmp(method_val[0], "l1-regularized") == 0
+                     ? Method::Lasso
                  : strcmp(method_val[0], "tlp-regularized") == 0
-                     ? 2
-                     : 3;
+                     ? Method::RTLP
+                     : Method::CTLP;
 
     const int n = X_mat.nrow();
     const int p = X_mat.ncol();
@@ -86,8 +73,8 @@ Rcpp::List call_glm_solver(Rcpp::NumericMatrix &X_mat,
     // const Eigen::Map<Eigen::VectorXd> kappa(&kappa_vec[0], nkappa);
 
     // output
-    // int ntune = (method == Method::CTLP ? nkappa : nlambda);
-    int ntune = (method == 3 ? nkappa : nlambda);
+    int ntune = (method == Method::CTLP ? nkappa : nlambda);
+    // int ntune = (method == 3 ? nkappa : nlambda);
     std::vector<Eigen::Triplet<double>> sp_beta_list;
     sp_beta_list.reserve(ntune * std::min(n, p));
     Rcpp::NumericVector intercept(ntune);
@@ -148,16 +135,16 @@ Rcpp::List call_bm_glm_solver(SEXP &X_mat,
                               Rcpp::CharacterVector &method_val)
 {
     // input
-    int family = strcmp(family_val[0], "gaussian") == 0
-                     ? 1
+    Family family = strcmp(family_val[0], "gaussian") == 0
+                     ? Family::Gaussian
                  : strcmp(family_val[0], "binomial") == 0
-                     ? 2
-                     : 3;
-    int method = strcmp(method_val[0], "l1-regularized") == 0
-                     ? 1
+                     ? Family::Binomial
+                     : Family::Poisson;
+    Method method = strcmp(method_val[0], "l1-regularized") == 0
+                     ? Method::Lasso
                  : strcmp(method_val[0], "tlp-regularized") == 0
-                     ? 2
-                     : 3;
+                     ? Method::RTLP
+                     : Method::CTLP;
 
     Rcpp::XPtr<BigMatrix> X_(X_mat);
     const int n = X_->nrow();
@@ -183,8 +170,8 @@ Rcpp::List call_bm_glm_solver(SEXP &X_mat,
     // const Eigen::Map<Eigen::VectorXd> kappa(&kappa_vec[0], nkappa);
 
     // output
-    // int ntune = (method == Method::CTLP ? nkappa : nlambda);
-    int ntune = (method == 3 ? nkappa : nlambda);
+    int ntune = (method == Method::CTLP ? nkappa : nlambda);
+    // int ntune = (method == 3 ? nkappa : nlambda);
     std::vector<Eigen::Triplet<double>> sp_beta_list;
     sp_beta_list.reserve(ntune * std::min(n, p));
     Rcpp::NumericVector intercept(ntune);

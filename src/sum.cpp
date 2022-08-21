@@ -41,11 +41,11 @@ Rcpp::List call_sum_solver(Rcpp::NumericMatrix &XX_mat,
                            Rcpp::CharacterVector &method_val)
 {
     // input
-    const int method = strcmp(method_val[0], "l1-regularized") == 0
-                           ? 1
+    Method method = strcmp(method_val[0], "l1-regularized") == 0
+                           ? Method::Lasso
                        : strcmp(method_val[0], "tlp-regularized") == 0
-                           ? 2
-                           : 3;
+                           ? Method::RTLP
+                           : Method::CTLP;
 
     const int n = n_val[0];
     const int p = XX_mat.ncol();
@@ -65,8 +65,8 @@ Rcpp::List call_sum_solver(Rcpp::NumericMatrix &XX_mat,
     // const Eigen::Map<Eigen::VectorXd> lambda(&lambda_vec[0], nlambda);
 
     // output
-    // int ntune = (method == Method::CTLP ? nkappa : nlambda);
-    int ntune = (method == 3 ? nkappa : nlambda);
+    int ntune = (method == Method::CTLP ? nkappa : nlambda);
+    //int ntune = (method == 3 ? nkappa : nlambda);
     std::vector<Eigen::Triplet<double>> sp_beta_list;
     sp_beta_list.reserve(ntune * std::min(n, p));
     Rcpp::NumericVector loss(ntune);
@@ -117,11 +117,11 @@ Rcpp::List call_bm_sum_solver(SEXP &XX_mat,
                            Rcpp::CharacterVector &method_val)
 {
     // input
-    const int method = strcmp(method_val[0], "l1-regularized") == 0
-                           ? 1
+    Method method = strcmp(method_val[0], "l1-regularized") == 0
+                           ? Method::Lasso
                        : strcmp(method_val[0], "tlp-regularized") == 0
-                           ? 2
-                           : 3;
+                           ? Method::RTLP
+                           : Method::CTLP;
 
     Rcpp::XPtr<BigMatrix> XX_(XX_mat);
     const int p = XX_->ncol();
@@ -142,8 +142,8 @@ Rcpp::List call_bm_sum_solver(SEXP &XX_mat,
     // const Eigen::Map<Eigen::VectorXd> lambda(&lambda_vec[0], nlambda);
 
     // output
-    // int ntune = (method == Method::CTLP ? nkappa : nlambda);
-    int ntune = (method == 3 ? nkappa : nlambda);
+    int ntune = (method == Method::CTLP ? nkappa : nlambda);
+    // int ntune = (method == 3 ? nkappa : nlambda);
     std::vector<Eigen::Triplet<double>> sp_beta_list;
     sp_beta_list.reserve(ntune * std::min(n, p));
     Rcpp::NumericVector loss(ntune);

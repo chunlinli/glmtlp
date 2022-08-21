@@ -36,7 +36,7 @@ void sum_solver(
     const double tau,
     const double tol,
     const int cd_maxit,
-    const int method,
+    Method method,
     std::vector<Eigen::Triplet<double>> &sp_beta_list,
     double *loss_ptr)
 {
@@ -48,8 +48,8 @@ void sum_solver(
     const Eigen::Map<const Eigen::VectorXd> kappa(kappa_ptr, nkappa);
 
     // output
-    // int ntune = (method == Method::CTLP ? nkappa : nlambda);
-    int ntune = (method == 3 ? nkappa : nlambda);
+    int ntune = (method == Method::CTLP ? nkappa : nlambda);
+    //int ntune = (method == 3 ? nkappa : nlambda);
     Eigen::Map<Eigen::VectorXd> l(loss_ptr, ntune);
     std::fill(l.data(), l.data() + ntune, 0.0);
 
@@ -260,8 +260,8 @@ void sum_solver(
                 break;
             }
 
-            //if (method == Method::Lasso || EXIT_FLAG)
-            if (method == 1 || EXIT_FLAG)
+            if (method == Method::Lasso || EXIT_FLAG)
+            //if (method == 1 || EXIT_FLAG)
             {
                 break;
             }
@@ -295,8 +295,8 @@ void sum_solver(
 
         } /* end of difference-of-convex programming */
 
-        //if (method == Method::CTLP)
-        if (method == 3)
+        if (method == Method::CTLP)
+        //if (method == 3)
         {
             // TODO
 

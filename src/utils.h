@@ -33,6 +33,21 @@
 
 #include "glmtlp.h"
 
+enum class Family
+{
+    Gaussian,
+    Binomial,
+    Poisson,
+    Noncanonical
+};
+
+enum class Method
+{
+    Lasso,
+    RTLP,
+    CTLP
+};
+
 inline double soft_thresh(double init, double thresh)
 {
     if (init > thresh)
@@ -44,15 +59,15 @@ inline double soft_thresh(double init, double thresh)
     return init;
 }
 
-inline double link(double mu, int family)
+inline double link(double mu, Family family)
 {
     switch (family)
     {
-    case 1: // Family::Gaussian:
+    case Family::Gaussian:
         return mu;
-    case 2: // Family::Binomial:
+    case Family::Binomial:
         return std::log(mu / (1.0 - mu));
-    case 3: // Family::Poisson:
+    case Family::Poisson:
         return std::log(mu);
     default:
         return NAN;
@@ -62,20 +77,20 @@ inline double link(double mu, int family)
 inline double compute_deviance(const Eigen::VectorXd &y,
                                const Eigen::VectorXd &eta,
                                const Eigen::VectorXd &w,
-                               int family)
+                               Family family)
 {
     switch (family)
     {
-    case 1: // Family::Gaussian:
+    case Family::Gaussian:
     {
         return (y - eta).array().square().matrix().dot(w);
     }
-    case 2: // Family::Binomial:
+    case Family::Binomial:
     {
         Eigen::ArrayXd mu = 1.0 / (1.0 + exp(-eta.array()));
         return -2.0 * w.dot((log(mu) * y.array() + log(1.0 - mu) * (1.0 - y.array())).matrix());
     }
-    case 3: // Family::Poisson:
+    case Family::Poisson:
     {
         Eigen::ArrayXd mu = exp(eta.array());
         return 2.0 * (w.array() * (log(y.array() / mu + 0.000000001) * y.array())).sum();
@@ -98,37 +113,3 @@ inline void glmtlp_warning(const std::string &msg)
     Rcpp::warning("[GLMTLP] " + msg);
 }
 
-
-//typedef Eigen::Triplet<double> T;
-
-
-// optimizer
-
-// template
-
-// void check_user_interrupt();
-// void glmtlp_warning(const std::string& msg);
-//
-// inline double soft_thresh(double init, double thresh);
-// inline double link(double mu, int family);
-// inline double compute_deviance(const Eigen::VectorXd &y,
-//                                const Eigen::VectorXd &eta,
-//                                const Eigen::VectorXd &w,
-//                                int family);
-
-// double objective(Eigen::VectorXd &v, double bound, double lambda)
-// {
-
-//     double obj = 0.0;
-//     for (int j = 0; j < v.size(); ++j)
-//     {
-//         double change = std::abs(v(j)) - lambda;
-//         if (change > 0)
-//         {
-//             obj += change;
-//         }
-//     }
-//     return obj - bound;
-// }
-
-//#endif // UTILS_HPP

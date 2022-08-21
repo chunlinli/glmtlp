@@ -26,12 +26,12 @@
 
 
 void glm_solver(
-    double *X_ptr,
-    double *y_ptr,
-    double *w0_ptr,
-    double *rho0_ptr,
-    double *kappa_ptr,
-    double *lambda_ptr,
+    const double *X_ptr,
+    const double *y_ptr,
+    const double *w0_ptr,
+    const double *rho0_ptr,
+    const double *kappa_ptr,
+    const double *lambda_ptr,
     const int n,
     const int p,
     const int nlambda,
@@ -41,8 +41,8 @@ void glm_solver(
     const double tol,
     const int cd_maxit,
     const int standardize,
-    int family,
-    int method,
+    Family family,
+    Method method,
     int ncores,
     std::vector<Eigen::Triplet<double>> &sp_beta_list,
     double *b0_ptr,
@@ -58,16 +58,16 @@ void glm_solver(
     omp_set_num_threads(ncores);
 #endif
 
-    const Eigen::Map<Eigen::MatrixXd> X(X_ptr, n, p);
-    const Eigen::Map<Eigen::VectorXd> y(y_ptr, n);
-    const Eigen::Map<Eigen::VectorXd> w0(w0_ptr, n);
-    const Eigen::Map<Eigen::VectorXd> rho0(rho0_ptr, p);
-    const Eigen::Map<Eigen::VectorXd> lambda(lambda_ptr, nlambda);
-    const Eigen::Map<Eigen::VectorXd> kappa(kappa_ptr, nkappa);
+    const Eigen::Map<const Eigen::MatrixXd> X(X_ptr, n, p);
+    const Eigen::Map<const Eigen::VectorXd> y(y_ptr, n);
+    const Eigen::Map<const Eigen::VectorXd> w0(w0_ptr, n);
+    const Eigen::Map<const Eigen::VectorXd> rho0(rho0_ptr, p);
+    const Eigen::Map<const Eigen::VectorXd> lambda(lambda_ptr, nlambda);
+    const Eigen::Map<const Eigen::VectorXd> kappa(kappa_ptr, nkappa);
 
     // output
-    // int ntune = (method == Method::CTLP ? nkappa : nlambda);
-    int ntune = (method == 3 ? nkappa : nlambda);
+    int ntune = (method == Method::CTLP ? nkappa : nlambda);
+    // int ntune = (method == 3 ? nkappa : nlambda);
     Eigen::Map<Eigen::VectorXd> b0(b0_ptr, ntune);
     Eigen::Map<Eigen::VectorXd> dev(dev_ptr, ntune);
 
@@ -191,10 +191,10 @@ void glm_solver(
                         /* beginning of observation weights update */
                         switch (family)
                         {
-                        case 1: // Family::Gaussian:
+                        case Family::Gaussian:
                             break;
 
-                        case 2: // Family::Binomial: // currently only allow w0 = 1
+                        case Family::Binomial: // currently only allow w0 = 1
                         {
                             for (int i = 0; i < n; ++i)
                             {
@@ -234,7 +234,7 @@ void glm_solver(
                             break;
                         }
 
-                        case 3: // Family::Poisson:
+                        case Family::Poisson:
                         {
                             for (int i = 0; i < n; ++i)
                             {
@@ -329,7 +329,7 @@ void glm_solver(
                             break;
                         }
 
-                        if (family == 1) // Family::Gaussian)
+                        if (family == Family::Gaussian)
                             break;
 
                         /* check newton-raphson convergence */
@@ -390,8 +390,8 @@ void glm_solver(
                 {
 
                     /* handling of saturated model */
-                    // if (family != Family::Gaussian && compute_deviance(y, eta, w0, family) < 0.01 * null_deviance)
-                    if (family != 1 && compute_deviance(y, eta, w0, family) < 0.01 * null_deviance)
+                    if (family != Family::Gaussian && compute_deviance(y, eta, w0, family) < 0.01 * null_deviance)
+                    //if (family != 1 && compute_deviance(y, eta, w0, family) < 0.01 * null_deviance)
                     {
                         EXIT_FLAG++;
 
@@ -424,8 +424,8 @@ void glm_solver(
                 break;
             }
 
-            // if (method == Method::Lasso || EXIT_FLAG)
-            if (method == 1 || EXIT_FLAG)
+            if (method == Method::Lasso || EXIT_FLAG)
+            //if (method == 1 || EXIT_FLAG)
             {
                 break;
             }
@@ -463,7 +463,7 @@ void glm_solver(
         } /* end of difference-of-convex programming */
 
         /* beginning of projection module */
-        if (method == 3) // Method::CTLP)
+        if (method == Method::CTLP)
         {
             // TODO
 
@@ -527,10 +527,10 @@ void glm_solver(
                     /* beginning of observation weights update */
                     switch (family)
                     {
-                    case 1: // Family::Gaussian:
+                    case Family::Gaussian:
                         break;
 
-                    case 2: // Family::Binomial: // currently only allow w0 = 0,1
+                    case Family::Binomial: // currently only allow w0 = 0,1
                     {
                         for (int i = 0; i < n; ++i)
                         {
@@ -563,7 +563,7 @@ void glm_solver(
                         break;
                     }
 
-                    case 3: // Family::Poisson:
+                    case Family::Poisson:
                     {
                         for (int i = 0; i < n; ++i)
                         {
@@ -616,7 +616,7 @@ void glm_solver(
                     }
                     intercept_new = beta_work_(support_size + df);
 
-                    if (family == 1) // Family::Gaussian)
+                    if (family == Family::Gaussian)
                         break;
 
                     /* check newton-raphson convergence */
