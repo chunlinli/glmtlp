@@ -1,5 +1,5 @@
 #pragma once
-#include "util.h"
+#include "utils.h"
 #include "Eigen/Sparse"
 
 void glm_solver(
