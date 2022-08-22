@@ -39,6 +39,18 @@ visualization
 
 
 
+## Citing information
+
+If you find this project useful, please consider citing 
+```
+@article{
+    author = {Chunlin Li, Yu Yang, Chong Wu, Xiaotong Shen, Wei Pan},
+    title = {{glmtlp: An R package for truncated Lasso penalty}},
+    year = {2022}
+}
+```
+
+
 ## References
 
 Li, C., Shen, X., & Pan, W. (2021). Inference for a large directed graphical model with interventions. *arXiv preprint* arXiv:2110.03805. <https://arxiv.org/abs/2110.03805>.
