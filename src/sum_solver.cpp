@@ -82,10 +82,10 @@ void sum_solver(
     {
         Rcpp::checkUserInterrupt();
 
-        std::copy(rho0.data(), rho0.data() + p, rho.data());
+        //std::copy(rho0.data(), rho0.data() + p, rho.data());
 
-        beta_new = beta_old;
-        Xr = Xr_old;
+        //beta_new = beta_old;
+        //Xr = Xr_old;
 
         /* beginning of varaible screening module */
         double cutoff = 2.0 * lambda(k) - lambda(k - 1);
