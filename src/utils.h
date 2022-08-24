@@ -39,7 +39,7 @@ enum class Family
     Gaussian,
     Binomial,
     Poisson,
-    Noncanonical
+    Other
 };
 
 enum class Method
@@ -118,4 +118,20 @@ void glmtlp_warning(const std::string &msg)
 {
     Rcpp::warning("[GLMTLP] " + msg);
 }
+
+
+
+STRONG_INLINE
+void wls_update()
+{
+
+}
+
+STRONG_INLINE
+void wlstlp_update()
+{
+
+}
+
+
 

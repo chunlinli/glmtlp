@@ -25,17 +25,19 @@ This version supports regression from summary statistics and out-of-core model f
 
 ## Highlights
 
-constrained likelihood approach, inference
+Constrained likelihood, inference
 
-an improved algorithm 
+An improved algorithm 
 
-any GLM
+Any GLM (to do)
 
-summary data
+GGM (to do)
 
-big data, memory management
+Summary data
 
-visualization
+Big data, memory management
+
+Visualization
 
 
 

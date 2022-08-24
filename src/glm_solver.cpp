@@ -149,7 +149,7 @@ void glm_solver(
         check_user_interrupt();
 
         // std::copy(rho0.data(), rho0.data() + p, rho.data());
-        // // warm start (this may be a bit inefficient for Lasso)
+        // // // warm start (this may be a bit inefficient for Lasso)
         // beta_new = beta_old;
         // intercept_new = intercept_old;
         // rw = rw_old;
@@ -244,6 +244,25 @@ void glm_solver(
                                     rw(i) = (y(i) - rw(i)) * w0(i);
                                 }
                             }
+
+                            w_sum = w.sum();
+#pragma omp parallel for schedule(static)
+                            for (int j = 0; j < p; ++j)
+                            {
+                                if (is_active[j])
+                                {
+                                    xwx(j) = (X.col(j).array().square() * w.array()).sum() / n;
+                                }
+                            }
+
+                            // std::copy(b.col(k).data(), b.col(k).data() + p, b_old.data());
+                            std::copy(beta_new.data(), beta_new.data() + p, b_old.data());
+                            break;
+                        }
+                        case Family::Other:
+                        {
+                            // update w, rw
+                            // wls_update();
 
                             w_sum = w.sum();
 #pragma omp parallel for schedule(static)
@@ -564,6 +583,32 @@ void glm_solver(
 
                     case Family::Poisson:
                     {
+                        for (int i = 0; i < n; ++i)
+                        {
+                            if (w(i) > 0.0)
+                            {
+                                mu(i) = std::exp(eta(i));
+                                w(i) = mu(i);
+                                z(i) = eta(i) + y(i) / w(i) - 1.0;
+                                // rw(i) = (y(i) - rw(i)) * w0(i);
+                                // if (std::isnan(w(i)) || std::isinf(w(i))) {
+                                //     printf("w(%d) = %f, %d iter\n", i, w(i), it_newton);
+                                //     printf("eta(%d) = %f, %d iter\n", i, eta(i), it_newton);
+                                //     printf("k = %d", k);
+                                // }
+                            }
+                        }
+
+                        // std::copy(b.col(k).data(), b.col(k).data() + p, b_old.data());
+                        std::copy(beta_work.data(), beta_work.data() + p, b_old.data());
+                        break;
+                    }
+
+                    case Family::Other:
+                    {
+                        // update
+
+                        // wls_tlp_update();
                         for (int i = 0; i < n; ++i)
                         {
                             if (w(i) > 0.0)

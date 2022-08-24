@@ -291,21 +291,20 @@ glmtlp <- function(X, y, family = c("gaussian", "binomial", "poisson"),
         lambda <- sort(lambda, decreasing = TRUE)
         if (lambda[nlambda] < 0) stop("lambdas should be non-negative")
         lambda_max <- get_lambda_max(X, y, weights)
-        if (lambda[1] < lambda_max) {
-            lambda <- c(lambda_max, lambda)
-        } else {
-            if (lambda[nlambda] >= lambda_max) {
-                message("null model, try smaller lambdas")
-                out <- get_null_output(
-                    this_call,
-                    y, family, method, penalty_factor, weights, exclude
-                )
-                if (return_data) {
-                    out$X <- X
-                    out$y <- y
-                }
-                return(out)
+
+        lambda <- c(max(lambda_max, lambda[1]) + tol, lambda)
+
+        if (lambda[nlambda] >= lambda_max) {
+            message("null model, try smaller lambdas")
+            out <- get_null_output(
+                this_call,
+                y, family, method, penalty_factor, weights, exclude
+            )
+            if (return_data) {
+                out$X <- X
+                out$y <- y
             }
+            return(out)
         }
     }
     df_max <- as.integer(df_max)

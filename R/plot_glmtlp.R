@@ -63,28 +63,29 @@
 plot.glmtlp <- function(x,xvar=c("lambda", "kappa", "deviance", "l1_norm", "log_lambda"),
                         xlab=iname, ylab="Coefficients", title="Solution Path",
                         label=FALSE, label_size=3, ...) {
+    xvar <- match.arg(xvar)
     which_plot <- which(apply(abs(x$beta), 1, sum) != 0)
     if (length(which_plot) == 0) {
         warning("No plot produced, since all coefficients are zero or non-penalized.")
         return ()
     }
-    if (xvar == "lambda" | xvar == "log_lambda") {
-        if (x$penalty == "l0") stop("No plot generated, since the l0 penalty should be plotted with xvar='kappa'.")
+    if (xvar == "lambda" || xvar == "log_lambda") {
+        if (x$method == "tlp-constrained") stop("No plot generated, since the l0 penalty should be plotted with xvar='kappa'.")
         if (length(x$lambda) == 1) {
         warning("No plot generated, since the x was fit only on one lambda.")
         return ()
         }
     }
     if (xvar == "kappa") {
-        if (x$penalty != "l0") stop("No plot generated, since the xvar='kappa' should be used together with non-l0 penalties.")
+        if (x$method != "tlp-constrained") stop("No plot generated, since the xvar='kappa' should be used together with non-l0 penalties.")
         if (length(x$kappa) == 1) {
         warning("No plot generated, since the x was fit only on one kappa.")
         return ()
         }
     }
 
-    beta <- x$beta[which_plot, , drop=FALSE]
-    xvar <- match.arg(xvar)
+    beta <- as.matrix(x$beta)[which_plot, , drop=FALSE]
+    #xvar <- match.arg(xvar)
     switch(xvar,
         "lambda" = {
             index <- x$lambda
