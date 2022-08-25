@@ -24,7 +24,6 @@
 
 //#include "glmtlp.hpp"
 
-
 #include <vector>
 #include <string.h>
 #include <string>
@@ -72,6 +71,8 @@ double link(double mu, Family family)
         return std::log(mu / (1.0 - mu));
     case Family::Poisson:
         return std::log(mu);
+    case Family::Other:
+        return NAN; // TODO: other link function
     default:
         return NAN;
     }
@@ -79,9 +80,9 @@ double link(double mu, Family family)
 
 STRONG_INLINE
 double compute_deviance(const Eigen::VectorXd &y,
-                               const Eigen::VectorXd &eta,
-                               const Eigen::VectorXd &w,
-                               Family family)
+                        const Eigen::VectorXd &eta,
+                        const Eigen::VectorXd &w,
+                        Family family)
 {
     switch (family)
     {
@@ -97,7 +98,11 @@ double compute_deviance(const Eigen::VectorXd &y,
     case Family::Poisson:
     {
         Eigen::ArrayXd mu = exp(eta.array());
-        return 2.0 * (w.array() * (log(y.array() / mu + 0.000000001) * y.array())).sum();
+        return 2.0 * (w.array() * (log(y.array() / mu + 0.00000001) * y.array())).sum();
+    }
+    case Family::Other: // TODO: other
+    {
+        return NAN;
     }
 
     default:
@@ -118,20 +123,3 @@ void glmtlp_warning(const std::string &msg)
 {
     Rcpp::warning("[GLMTLP] " + msg);
 }
-
-
-
-STRONG_INLINE
-void wls_update()
-{
-
-}
-
-STRONG_INLINE
-void wlstlp_update()
-{
-
-}
-
-
-
